@@ -4,12 +4,19 @@ import java.util.Scanner;
 public class Main {
 	
 	public static void main(String[] args) {
-		System.out.println("Enter name:");
+		
+		
+		// User enter his name
+		System.out.print("Enter name:");
 		Scanner sc = new Scanner(System.in);
+		// gets the line entered by the user
 		String name = sc.next();
-		System.out.println("hello, " + name);
+		// output welcome message
+		System.out.println("Hallo, " + name + "!");
+		// close the input stream
 		sc.close();
-
+	
+	
 	}
 	
 }
