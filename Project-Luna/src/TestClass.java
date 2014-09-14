@@ -6,6 +6,11 @@ public class TestClass {
 		
 		
 		
+		/*
+		 * ADDED SOME COMMENTS
+		 */
+		
+		
 		// asdasd
 	}
 
