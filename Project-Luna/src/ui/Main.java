@@ -5,7 +5,8 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		
+		//Greet the user:
+		sayHello();
 		// User enter his name
 		System.out.print("Enter name:");
 		Scanner sc = new Scanner(System.in);
@@ -18,6 +19,11 @@ public class Main {
 	
 		//AND WE ARE NOT DONE
 		//PUSH!
+	}
+	
+	private static void sayHello()
+	{
+		System.out.println("Hello!");
 	}
 	
 }
