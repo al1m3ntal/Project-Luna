@@ -2,7 +2,6 @@ package ui;
 import java.util.Scanner;
 
 public class Main {
-
 	
 	public static void main(String[] args) {
 		System.out.println("Enter name:");
@@ -10,5 +9,7 @@ public class Main {
 		String name = sc.next();
 		System.out.println("hello, " + name);
 		sc.close();
+
 	}
+	
 }
