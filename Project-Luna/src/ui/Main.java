@@ -10,6 +10,7 @@ public class Main {
 		printStars(20);
 	}
 	
+	
 	private static void sayHello()	{
 
 		System.out.println("Hello!\n");
