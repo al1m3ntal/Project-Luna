@@ -26,15 +26,19 @@ public class Main {
 	/** Boolean flag on whether AntiAliasing is enabled or not */
 	private static boolean antiAlias = true;
 	
-	//Textures
+	/** Textures */
 	static Texture texture_desert;
 	static Texture texture_marker;
-	//Fonts
+	
+	/** Fonts */
 	static TrueTypeFont font;
-	// last pressed mouse-position. Init with 100
+	
+	/** last pressed mouse-position. Init with 100 */
 	static int mouse_x = 100;
 	static int mouse_y = 100;
 
+	static float rotation = 0;
+	
 	public static void main(String[] args) {
 
 		// init OpenGL here
@@ -59,8 +63,8 @@ public class Main {
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
 			pollInput();
-			drawImage(texture_desert, 0, 0, window_width, window_height);
-			drawImage(texture_marker, mouse_x-25, mouse_y-25,50,50);
+			drawImage(texture_desert, 0, 0, window_width, window_height, 0.0f);
+			drawImage(texture_marker, mouse_x-25, mouse_y-25,50,50, rotation);
 			
 			drawText(font, Color.black, 5, 5, "Mark the hidden entrance!");
 			Display.update();
@@ -81,6 +85,7 @@ public class Main {
 			int y = window_height - Mouse.getY();
 			mouse_x = x;
 			mouse_y = y;
+			rotation += 5.5f;
 		}
 	}
 
@@ -157,11 +162,14 @@ public class Main {
 	/**
 	 * draw a quad with the image on it at the specified position and the specified size
 	 */
-	public static void drawImage(Texture texture, int x, int y, int w, int h) {
+	public static void drawImage(Texture texture, int x, int y, int w, int h, float rotation) {
 		// store the current model matrix
 		GL11.glPushMatrix();
 		texture.bind(); // or GL11.glBind(texture.getTextureID());
-		GL11.glTranslatef(x, y, 0);
+		
+		GL11.glTranslatef(x+w/2, y+h/2, 0);
+		GL11.glRotatef(rotation, 0f, 0f, 1f);
+		GL11.glTranslatef(-w/2, -h/2, 0);
 		
 		GL11.glBegin(GL11.GL_QUADS);
 		GL11.glTexCoord2f(0, 0);
