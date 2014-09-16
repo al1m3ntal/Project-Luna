@@ -1,5 +1,6 @@
 package ui;
 
+import java.awt.Font;
 import java.io.IOException;
 
 import org.lwjgl.LWJGLException;
@@ -9,17 +10,27 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Renderable;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
+import util.Log;
+
 public class Main {
-	//Window params
+	
+	/** Window params */
 	static int window_width = 1000;
 	static int window_height = 1000;
+	
+	/** Boolean flag on whether AntiAliasing is enabled or not */
+	private static boolean antiAlias = true;
+	
 	//Textures
 	static Texture texture_desert;
 	static Texture texture_marker;
+	//Fonts
+	static TrueTypeFont font;
 	// last pressed mouse-position. Init with 100
 	static int mouse_x = 100;
 	static int mouse_y = 100;
@@ -32,10 +43,12 @@ public class Main {
 		texture_desert = initTexture("res/desert.png");
 		texture_marker = initTexture("res/area_marker.png");
 		
+		font = initFont("Times New Roman");
+		
 		//check if everything is initialized properly:
 		if(texture_desert == null || texture_marker == null)
 		{
-			System.out.println("Ini-Error: At least one texture was not loaded properly.");
+			Log.printErr("Main","Ini-Error: At least one texture was not loaded properly.");
 			return;
 		}
 		
@@ -48,6 +61,8 @@ public class Main {
 			pollInput();
 			drawImage(texture_desert, 0, 0, window_width, window_height);
 			drawImage(texture_marker, mouse_x-25, mouse_y-25,50,50);
+			
+			drawText(font, Color.black, 5, 5, "Mark the hidden entrance!");
 			Display.update();
 		}
 
@@ -64,7 +79,6 @@ public class Main {
 		if (Mouse.isButtonDown(0)) {
 			int x = Mouse.getX();
 			int y = window_height - Mouse.getY();
-			System.out.println("MOUSE DOWN @ X: " + x + " Y: " + y);
 			mouse_x = x;
 			mouse_y = y;
 		}
@@ -114,11 +128,29 @@ public class Main {
 			// load texture from PNG file
 			texture = TextureLoader.getTexture("PNG",
 					ResourceLoader.getResourceAsStream(path));
-			System.out.println(">> Image height: " + texture.getImageHeight());
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return texture;
+	}
+	
+	public static TrueTypeFont initFont(String type) {
+		// load a default java font
+		Font awtFont = new Font(type, Font.BOLD, 24);
+		TrueTypeFont font = new TrueTypeFont(awtFont, antiAlias);
+
+//		// load font from file
+//		try {
+//		InputStream inputStream = ResourceLoader.getResourceAsStream("myfont.ttf");
+//
+//		Font awtFont2 = Font.createFont(Font.TRUETYPE_FONT, inputStream);
+//		awtFont2 = awtFont2.deriveFont(24f); // set font size
+//		font2 = new TrueTypeFont(awtFont2, antiAlias);
+//		} catch (Exception e) {
+//		e.printStackTrace();
+//		}
+		return font;
 	}
 
 	
@@ -144,6 +176,16 @@ public class Main {
 		
 		// restore the model view matrix to prevent contamination
 		GL11.glPopMatrix();
+	}
+	
+	/**
+	 * draw Text at the specified position 
+	 */
+	public static void drawText(TrueTypeFont font, Color color, int x, int y, String text) {
+		Color.white.bind();
+		font.drawString(x, y, text, color);
+		//Set the color to white again
+		Color.white.bind();
 	}
 
 }
