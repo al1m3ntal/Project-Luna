@@ -4,12 +4,12 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
+import util.Log;
+
 
 public class AlexTutorial {
 
 	public static void main(String[] args) {
-
-		System.err.println("STARTING TUTORIAL PROGRAMM");
 
 		// set up display
 		try{
@@ -26,6 +26,10 @@ public class AlexTutorial {
 			Display.update();
 			
 		}
+		
+		Log.print("ALEX_TUTORIAL", "Welcome Message");
+		Log.printErr("ALEX_TUTORIAL", "Welcome Message");
+		
 		
 		
 		Display.destroy();
