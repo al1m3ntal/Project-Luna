@@ -1,6 +1,5 @@
 package ui;
 
-import java.io.IOException;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Mouse;
@@ -8,31 +7,34 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
-import org.newdawn.slick.util.ResourceLoader;
 
 import ctrl.Controller;
 import util.Log;
 
 public class Window {
 
+	// class name, do not change
 	private final String CLASS = "WINDOW";
 	
-	/* Height of the displayed window */
-	private static int window_height;
-
-	/* the controller, which is responsible for all the calculations. */
-	private static Controller controller;
+	/* Dimensions and properties of this window */
+	private int height;
+	private int width;
+	private boolean vsync = true;
 	
-	public Window(){
-		//TODO uebergib Controller
+
+	/* the controller, which is responsible for all the calculations and upates */
+	private Controller controller;
+	
+	public Window(Controller controller){
+		this.controller = controller;
+
 		// set up display
-		window_height = 1080;
-		initGL(1920, window_height);
+		// we need to set the window dimensions first, before we can initialize OpenGL
+		height = 1080;
+		width = 1920;
+		initGL();
 		
-		
-		
-		// game loop ? 
+		// game loop 
 		while (!Display.isCloseRequested()){
 			// Clear The Screen And The Depth Buffer
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
@@ -42,8 +44,9 @@ public class Window {
 			drawBullets();
 			drawTanks();
 			
-			//TODO call controller.update()						
-						
+			// update all game events 
+			controller.update();
+			// update the display 
 			Display.update();			
 		}
 		
@@ -53,18 +56,16 @@ public class Window {
 	
 	
 	/**
-	 * Initialise the GL display
-	 *
-	 * @param width
-	 *            The width of the display
-	 * @param height
-	 *            The height of the display
+	 * Initialize the GL display
+	 * <br><br>
+	 * Set window.height, window.width first before calling this method, otherwise the 
+	 * window dimensions will be 0 x 0.
 	 */
-	private static void initGL(int width, int height) {
+	private void initGL() {
 		try {
 			Display.setDisplayMode(new DisplayMode(width, height));
 			Display.create();
-			Display.setVSyncEnabled(true);
+			Display.setVSyncEnabled(vsync);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -90,46 +91,49 @@ public class Window {
 	/**
 	 * Draws all the tanks of the controller
 	 */
-	private static void drawTanks()
-	{
+	private void drawTanks(){
 		
 	}
 	
 	/**
 	 * Draws all the bullets of the controller
 	 */
-	private static void drawBullets()
-	{
+	private void drawBullets(){
 		
 	}
 
 	/**
 	 * Draws the map of the controller
 	 */
-	private static void drawMap()
-	{
+	private  void drawMap(){
 		
 	}
 
 	
 	/**
 	 * Poll the Input on the Window
-	 * 0/0 should be in the top-left corner, when it is in the bottom-left
+	 * 0/0 should be in the top-left corner, but is in the bottom-left
 	 * therefore convert it properly
 	 */
-	private static void pollInput() {
+	private void pollInput() {
 		//Left MouseButton clicked
 		if (Mouse.isButtonDown(0)) {
 			int x = Mouse.getX();
-			int y = window_height - Mouse.getY();
+			int y = height - Mouse.getY();
 			//TODO do something with it
 		}
 	}
 	
 	/**
-	 * draw an image at the specified position and the specified size and rotation
+	 * draw an image at the specified position with the specified size and rotation
+	 * @param texture [{@link Texture}] image to be drawn
+	 * @param x [int] Left
+	 * @param y [int] Top
+	 * @param w [int] Right
+	 * @param h [int] bottom
+	 * @param rotation [float] Angel at which to draw the image
 	 */
-	private static void drawImage(Texture texture, int x, int y, int w, int h, float rotation) {
+	private void drawImage(Texture texture, int x, int y, int w, int h, float rotation) {
 		// store the current model matrix
 		GL11.glPushMatrix();
 		texture.bind(); // or GL11.glBind(texture.getTextureID());

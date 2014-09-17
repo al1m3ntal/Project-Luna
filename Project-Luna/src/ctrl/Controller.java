@@ -19,6 +19,9 @@ import org.lwjgl.util.vector.Vector2f;
  */
 public class Controller {
 	
+	// class name, do not change (except when changing the actual class name)
+	private final String CLASS = "CONTROLLER";
+	
 	public enum GameState{ IN_GAME, IN_MENU }
 	
 	/** Current state of the game (see {@link GameState})*/
