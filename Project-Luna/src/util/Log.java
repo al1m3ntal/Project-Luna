@@ -7,11 +7,11 @@ public class Log {
 
 	
 	public static void print(String className, String message){
-		System.out.println(getTime() + "   " + className  + ":   " + message);
+		System.out.println(getTime() + "\t" + className  + ":\t\t" + message);
 	}
 	
 	public static void printErr(String className, String message){
-		System.err.println(getTime() + "   " + className  + ":   " + message);
+		System.err.println(getTime() + "\t" + className  + ":\t\t" + message);
 	}
 	
 	public static String getTime(){
