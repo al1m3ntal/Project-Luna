@@ -13,6 +13,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,6 +25,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -72,7 +75,7 @@ class EditorWindow extends JFrame implements ActionListener{
 	JButton button_increaseZoom = new JButton("+");
 	JButton button_decreaseZoom = new JButton("-");
 	JButton button_save = new JButton("Save Map");
-	JButton button_load = new JButton("Load Map");
+	JButton button_load = new JButton("Load Map or Create New Map");
 	
 	JRadioButton rb_drag = new JRadioButton("Click & Drag");
 	JRadioButton rb_click = new JRadioButton("Single Click");
@@ -80,11 +83,18 @@ class EditorWindow extends JFrame implements ActionListener{
 	JRadioButton rb_draw_solid = new JRadioButton("Draw Solid");
 	JRadioButton rb_draw_map = new JRadioButton("Draw Map");
 	
-	static JTextField textField_fileName = new JTextField("");
+	JTextField textField_fileName = new JTextField("");
 	
 	MapView mapview ; 
 	
-	JLabel tileInfo = new JLabel("Hover over a tile for information.");
+	JLabel label_tileInfo = new JLabel("Hover over a tile for information.");
+	JLabel label_mapInfo = new JLabel("<html>-> Create a new map by loading a map texture (.png)"
+										+ "<br>-> Or load a tile map file (.map)"
+										+ "<br>-> You can also create a tile map from a heightmap file (.hm.png)"
+										+ "<br><br>*Note* all files belonging to one map "
+										+ "<br>must have the same name (but different extensions)"
+										+ "</html>");
+			
 	
 	
 	public EditorWindow(){
@@ -120,6 +130,13 @@ class EditorWindow extends JFrame implements ActionListener{
 		convertButtons.setPreferredSize(new Dimension(350,150));
 		JLabel convertInfo = new JLabel("   Convert selection to:");
 		convertInfo.setPreferredSize(new Dimension(350,50));
+		
+		button_tile_free.setBackground(Color.BLACK);
+		button_tile_free.setForeground(Color.LIGHT_GRAY);
+		button_tile_obstacle.setBackground(Color.RED);
+		button_tile_water.setBackground(Color.BLUE);
+		button_tile_water.setForeground(Color.LIGHT_GRAY);
+		button_tile_hazard.setBackground(Color.ORANGE);
 		convertButtons.add(convertInfo);
 		convertButtons.add(button_tile_free);
 		convertButtons.add(button_tile_obstacle);
@@ -132,7 +149,7 @@ class EditorWindow extends JFrame implements ActionListener{
 		JPanel tileInfoPanel = new JPanel();
 		tileInfoPanel.setPreferredSize(new Dimension(350,125));
 		tileInfoPanel.setBorder(BorderFactory.createTitledBorder("Tile Information"));
-		tileInfoPanel.add(tileInfo);
+		tileInfoPanel.add(label_tileInfo);
 		
 		// Map Options
 		JPanel mapPanel = new JPanel();
@@ -141,9 +158,6 @@ class EditorWindow extends JFrame implements ActionListener{
 		mapPanel.add(button_decreaseZoom);
 		mapPanel.add(button_increaseZoom);
 		JPanel drawOptionsPanel = new JPanel();
-		rbg = new ButtonGroup();
-		rbg.add(rb_draw_grid);
-		rbg.add(rb_draw_solid);
 		rb_draw_solid.setSelected(true);
 		rb_draw_map.setSelected(true);
 		drawOptionsPanel.add(rb_draw_grid);
@@ -156,18 +170,27 @@ class EditorWindow extends JFrame implements ActionListener{
 		fileOptions.setPreferredSize(new Dimension(350,125));
 		fileOptions.setBorder(BorderFactory.createTitledBorder("File Options"));
 		textField_fileName.setPreferredSize(new Dimension(150,25));
+		textField_fileName.setEditable(false);
+		button_save.setEnabled(false);
+		button_load.setPreferredSize(new Dimension(243,25));
+		fileOptions.add(button_load);
 		fileOptions.add(textField_fileName);
 		fileOptions.add(button_save);
-		fileOptions.add(button_load);
-
 		
+		
+		// Map information 
+		JPanel mapInfo = new JPanel();
+		mapInfo.setPreferredSize(new Dimension(350,150));
+		mapInfo.setBorder(BorderFactory.createTitledBorder("Map Information"));
+		mapInfo.add(label_mapInfo);
 		
 		
 		// add to info panel 
 		infoPanel.add(selectionModePanel);
 		infoPanel.add(convertButtons);
-		infoPanel.add(tileInfoPanel);
 		infoPanel.add(mapPanel);
+		infoPanel.add(tileInfoPanel);
+		infoPanel.add(mapInfo);
 		infoPanel.add(fileOptions);
 		
 		
@@ -193,82 +216,155 @@ class EditorWindow extends JFrame implements ActionListener{
 		setVisible(true);
 	}
 	
-	
-	
 	// save mission to file
-	private static void saveMap(Tile[][] tiles){
+	private void saveMap(Tile[][] tiles){
+		// tileMap to be saved 
 		try {
 			
+			// get the filename
 			String fileName =  textField_fileName.getText();
 			if ( fileName.trim().isEmpty() || fileName == null )
 				fileName = "New Map";
 			
-			File file = new File("missions/custom/" + fileName + ".map");
+			// save the file with the '.MAP' Extension
+			// if the file exists, we just overwrite it for now
+			File file = new File("missions/" + fileName + ".map");
 			if( !file.exists()){
 				file.createNewFile();
 			}
 			
+			// save the tileMap as a binary java object 
 			FileOutputStream out = new FileOutputStream(file);
 			ObjectOutputStream objout = new ObjectOutputStream(out);
 			objout.writeObject(tiles);
 			objout.close();
 			out.close();
-			
 			Log.print("MAP_EDITOR", "Saved map '" + fileName + ".map'");
-			
+
+			// TODO notify the user of anyhting that didn't happen according to plan
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	
 	}
 	
 	
-	
-	private static Tile[][] loadMap(){
+
+	/**
+	 * Loads a map from either a .map or a .png file 
+	 * <br><br> 
+	 * If the user chooses to load from a .map, then the map.png is 
+	 * also loaded. 
+	 * <br><br>
+	 * If the user chooses to load from a .png file, then an empty 
+	 * tileMap is created and can be saved. 
+	 * <br><br>
+	 * If the users chooses a .hm.png (heightmap file) then create 
+	 * a tileMap using the pixel data, also save and show the the 
+	 * tileMap afterwards.
+	 * 
+	 */
+	private void loadMap(){
 		
 		String fileName =""; 
 		
-		JFileChooser chooser = new JFileChooser("missions/custom");
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Map files", "map");
+		// The use may either load a normal PNG image 
+		// or a map file 
+		
+		JFileChooser chooser = new JFileChooser("missions");
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("Maps, maps and heightmaps", "map", "png");
 		chooser.setFileFilter(filter);
 		int returnVal = chooser.showOpenDialog(null);
 		if(returnVal == JFileChooser.APPROVE_OPTION) 
 			fileName = chooser.getSelectedFile().getName();
+		else
+			return; 
 
 		
+		if ( fileName.endsWith(".map"))
+			loadFromMAP(fileName);
+
+		else if (fileName.endsWith(".hm.png"))
+			loadFromHeightmap(fileName);
+
+		else if (fileName.endsWith(".png"))
+			loadFromPNG(fileName);
+			
 		
-		
-		try {
-			File file = new File("missions/custom/" + fileName);
+		// enable the save button now
+		mapview.invalidate();
+		button_save.setEnabled(true);
+		return;
+	}
+	
+	private void loadFromMAP(String fileName){
+		try{
+			File file = new File("missions/" + fileName);
 			FileInputStream in = new FileInputStream(file);
 			ObjectInputStream objin = new ObjectInputStream(in);
 			Tile[][] temp =	(Tile[][]) objin.readObject();
 			objin.close();
 			in.close();
-			
-			
+			// create the mission map and load the map from the mapview createMap method
+			mapview.createMap("missions/" + fileName.replace(".map", ".png"), temp);
+			// set the mission name
 			textField_fileName.setText(fileName.replace(".map", ""));
-			Log.print("MAP_EDITOR", "Loaded map '" + fileName +"'");	
-
-			return temp;
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
+			Log.print("MAP_EDITOR", "Loaded map '" + fileName +"'");
+		}
+		catch(Exception e) { 
 			e.printStackTrace();
 		}
-	
-		
-		
-		return null;
-		
 	}
 	
+	private void loadFromPNG(String fileName){
+		// load the map texture, but tell the mapview to create a new missionMap
+		mapview.createMap("missions/" + fileName, null);
+		textField_fileName.setText(fileName.replace(".png", ""));
+	}
 	
+	private void loadFromHeightmap(String fileName) {
+		
+		// we need a bufferedImage to call getRGB()
+		BufferedImage heightmap = (BufferedImage) TextureManager.loadImage("missions/" + fileName);
+		
+		// get the dimensions and create a new tile map
+		int width = heightmap.getWidth();
+		int height = heightmap.getHeight();
+		int tileMapHeight = (int)(width/10);
+		int tileMapWidth = (int)(height/10);
+		Tile[][] missionMap = new Tile[tileMapHeight][tileMapWidth];
+
+		// PREdefine the colors used in the heightmap
+		final int blockType_free 	 = -1;				// WHITE
+		final int blockType_obstacle = -16777216;		// BLACK
+		final int blockType_water 	 = -16776961;		// BLUE
+		final int blockType_hazard 	 = -39424;			// ORANGE
+
+		
+		for(int x = 0; x < missionMap.length ; x ++){
+			for(int y = 0; y < missionMap[x].length ; y ++){
+				// get the pixel colors every 10 pixels 
+				switch(heightmap.getRGB(x*10, y*10)){
+					default:
+					case blockType_free: 	 missionMap[x][y] = new Tile(TileType.FREE, x, y); break;
+					case blockType_obstacle: missionMap[x][y] = new Tile(TileType.OBSTACLE, x, y); break;
+					case blockType_water: 	 missionMap[x][y] = new Tile(TileType.WATER, x, y); break;
+					case blockType_hazard:	 missionMap[x][y] = new Tile(TileType.HAZARD, x, y); break;
+				}
+			}
+		}
+		
+		
+	    
+		// set the filename
+		textField_fileName.setText(fileName.replace(".hm.png", ""));
+		// save the newly created tilemap
+		//saveMap(missionMap);
+		// finally, tell the mapview to show the newly created map and its tile map
+		mapview.createMap("missions/" + fileName.replace(".hm.png", ".png"), missionMap);
+		
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -290,8 +386,7 @@ class EditorWindow extends JFrame implements ActionListener{
 			saveMap(mapview.missionMap);
 		if ( e.getSource().equals(button_load)){
 			String fileName =  textField_fileName.getText();
-			mapview.missionMap = loadMap();
-			mapview.repaint();
+			loadMap();
 		}
 		
 		// set selection type mode 
@@ -306,6 +401,7 @@ class EditorWindow extends JFrame implements ActionListener{
 		
 		if( e.getSource().equals(rb_draw_grid) || e.getSource().equals(rb_draw_solid)){
 			mapview.draw_grid = rb_draw_grid.isSelected();
+			mapview.draw_fill = rb_draw_solid.isSelected();
 			mapview.repaint();
 		}
 		if ( e.getSource().equals(rb_draw_map)){
@@ -337,6 +433,7 @@ class MapView extends JPanel implements MouseListener, MouseMotionListener{
 	
 	boolean draw_map = true; 
 	boolean draw_grid = false;
+	boolean draw_fill = false;
 	
 	//
 	Rectangle[][] rect;
@@ -359,60 +456,93 @@ class MapView extends JPanel implements MouseListener, MouseMotionListener{
 	Color free 		= new Color(0,0,0,100);
 	Color hazard 	= new Color(200,200,0,100); 
 	Color water 	= new Color(0,0,250,100);
-	Color drag  	= new Color(250,0,0);
+	Color drag  	= new Color(0,250,0,10);
 	
+	// current map files
+	// the map texture must have the same name as it's .map file
+	// but in PNG format 
 	Image texMap; 
 	
 	Tile[][] missionMap;
 	
 	
-	
 	public MapView(EditorWindow parent){
 		this.parent = parent;
-		
-		// load the map texture
-		texMap = TextureManager.loadImage("missions/abstract/map.png");
+	}
 	
+	
+	public void createMap(String missionName, Tile[][] missionMap){
 		
-
+		// ALWAYS load the map texture
+		texMap = TextureManager.loadImage(missionName);
+		if ( texMap == null ) {
+			Log.printErr("MAP_EDITOR", "Error loading map (texMap==null)");
+			return;
+		}
+		
 		// set the dimensions of the map
 		texHeight = texMap.getHeight(null);
 		texWidth = texMap.getWidth(null);
 		tileMapHeight = (int)(texHeight/10);
 		tileMapWidth = (int)(texWidth/10);
 		
+		// create a new mission map 
 		// set the tile map 
-		missionMap = new Tile[tileMapWidth][tileMapHeight];
+		if ( missionMap == null ){
+			// create new mission map
+			this.missionMap = new Tile[tileMapWidth][tileMapHeight];
+			// create every tile 
+			for(int x = 0; x < this.missionMap.length ; x ++)
+				for(int y = 0; y < this.missionMap[x].length ; y ++)
+					this.missionMap[x][y] = new Tile(TileType.FREE, x, y);
+		}
+		else 
+			this.missionMap = missionMap;
 
 		// set the drawing rectangles
 		rect = new Rectangle[tileMapWidth][tileMapHeight];
 		selection = new boolean[tileMapWidth][tileMapHeight];
 		
 		// create rectangles from tile map 
-		for(int x = 0; x < missionMap.length ; x ++)
-			for(int y = 0; y < missionMap[x].length ; y ++){
-				missionMap[x][y] = new Tile(TileType.FREE, x, y);
+		for(int x = 0; x < this.missionMap.length ; x ++)
+			for(int y = 0; y < this.missionMap[x].length ; y ++)
 				rect[x][y] = new Rectangle(x*rectSize, y*rectSize, rectSize, rectSize);
-			}
 			
-	
-		
+		// set the size of this panel to that of the map
 		setPreferredSize(new Dimension(texWidth, texHeight));
+		repaint();
+		
 		// add the mouse listener 
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		setDoubleBuffered(true);
+		
+		// set the map info in the parent view 
+		parent.label_mapInfo.setText("<html>"
+				+ "Map Texture: " + missionName  
+				+ "<br>tile Map: " + missionName.replace(".png", ".map")  
+				+ "<br>Map Width: " + texWidth  
+				+ "<br>Map Height: " + texHeight  
+				+ "<br>Tile Map Width: " + tileMapWidth
+				+ "<br>Tile Map Height: " + tileMapHeight  
+				+ "<br>Tile Size: " + rectSize  
+				+ "</html>");
+		
 	}
+	
+	
+	
 	
 	@Override
 	protected void paintComponent(Graphics g) {
 	      super.paintComponent(g);
 
-	      // draw map 
-	      if( draw_map)
-	    	  g.drawImage(texMap, 0, 0, (int)(texWidth*zoomLevel), (int)(texHeight*zoomLevel), null);
-	     
+	      if ( texMap == null)
+	    	  return; 
 	      
+	      // draw map 
+	      if( draw_map && texMap != null )
+	    	  g.drawImage(texMap, 0, 0, (int)(texWidth*zoomLevel), (int)(texHeight*zoomLevel), null);
 	      
 	      // draw map tiles 
 	      for(int x = 0; x < rect.length ; x ++)
@@ -432,8 +562,8 @@ class MapView extends JPanel implements MouseListener, MouseMotionListener{
 		    		  if (selection[x][y])
 		    			  g.fillRect(rect[x][y].x, rect[x][y].y, rect[x][y].width, rect[x][y].height);
 		    	  }
-		    		  
-		    	  else{
+		    	  
+		    	  if( draw_fill ){
 		    		  g.fillRect(rect[x][y].x, rect[x][y].y, rect[x][y].width, rect[x][y].height);
 		    		  // if the tile is selected, draw it again to appear selected (because of the alpha value
 		    		  // it will appear darker)
@@ -495,6 +625,7 @@ class MapView extends JPanel implements MouseListener, MouseMotionListener{
 					
 		
 		repaint();
+		invalidate();
 	}
 
 	@Override
@@ -549,7 +680,7 @@ class MapView extends JPanel implements MouseListener, MouseMotionListener{
 		for(int x = 0; x < rect.length ; x ++)
 			for(int y = 0; y < rect[0].length ; y ++)
 				if ( rect[x][y].contains(mouseX, mouseY)){
-					parent.tileInfo.setText("<html>"
+					parent.label_tileInfo.setText("<html>"
 							+ "Tile Type: " + missionMap[x][y].type  
 							+ "<br>Tile Position X: " + x  
 							+ "<br>Tile Position Y: " + y 
@@ -578,7 +709,7 @@ class MapView extends JPanel implements MouseListener, MouseMotionListener{
 					if ( drag_selection.contains(rect[x][y])){
 						selection[x][y] = true; 
 					}
-			repaint(drag_selection);
+			repaint();
 		}
 		
 		drag_selection.setBounds(0,0,0,0);

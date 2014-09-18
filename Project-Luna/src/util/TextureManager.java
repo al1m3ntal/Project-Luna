@@ -1,6 +1,13 @@
 package util;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
@@ -39,8 +46,17 @@ public class TextureManager {
 	 * Loads a java AWT image from the given file path. <br><br>
 	 * Used in the map editor
 	 */
-	public static java.awt.Image loadImage(String path){
-		return new javax.swing.ImageIcon(path).getImage();
+	public static Image loadImage(String path){
+		
+		try{
+			Image img = ImageIO.read(new File(path));
+			return img; 
+		}catch(Exception e){
+			return null; 
+		}
+		
+		//return new ImageIcon(path).getImage();
 	}
+	
 	
 }
