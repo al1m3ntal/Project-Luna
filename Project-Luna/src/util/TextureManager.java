@@ -17,7 +17,7 @@ import org.newdawn.slick.util.ResourceLoader;
 public class TextureManager {
 
 	/**
-	 * Loading an image of the .png format from given path and returning it.
+	 * Loads a PNG image from given path
 	 * @param path to file
 	 */
 	public static Texture load(String path) {
@@ -32,4 +32,15 @@ public class TextureManager {
 		}
 		return texture;
 	}
+	
+	
+	
+	/**
+	 * Loads a java AWT image from the given file path. <br><br>
+	 * Used in the map editor
+	 */
+	public static java.awt.Image loadImage(String path){
+		return new javax.swing.ImageIcon(path).getImage();
+	}
+	
 }

@@ -16,35 +16,23 @@ import org.newdawn.slick.opengl.Texture;
  */
 public class Mission {
 	
-	/** Tiled map of this mission. */
-	public Tile[][] map = new Tile[200][200];
+	/** Name of this mission */
+	public String name;
 	
-	/** Map texture of this mission. */
-	public Texture mapTexture;
+	/** Tiled map of this mission. */
+	public Tile[][] map;
 	
 	/** Player's Tank */
 	public Tank playerTank;
 	
 	/** List of AI tanks */
-	List<Tank> aiTanks;
+	public List<Tank> aiTanks;
 	
 	
 	public Mission() {
-		
-		// create empty tile map 
-		for(int x = 0; x < map.length ; x ++)
-			for(int y = 0; y < map[0].length ; y ++)
-				map[x][y] = new Tile(TileType.FREE, x, y);
-
 		// TODO load map tiles from file
-
-		// TODO load map texture
-		
 		// TODO create Player tank 
-		
 		// TODO create List of AI tanks
-		
-		
 	}
 	
 	
