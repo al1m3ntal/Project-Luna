@@ -37,6 +37,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.StyledEditorKit.ForegroundAction;
 
 import org.newdawn.slick.gui.MouseOverArea;
 import org.newdawn.slick.opengl.Texture;
@@ -101,8 +102,9 @@ class EditorWindow extends JFrame implements ActionListener{
 		// create window 
 		setTitle("Project-Luna Map Editor");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(1350, 1000);
+		setSize(1375, 1000);
 		
+		final int infoPanelWidth = 375;
 		// init map view 
 		mapview = new MapView(this);
 		
@@ -113,10 +115,10 @@ class EditorWindow extends JFrame implements ActionListener{
 		
 		// add a info panel to the right
 		JPanel infoPanel = new JPanel();
-		infoPanel.setPreferredSize(new Dimension(350,1000));
+		infoPanel.setPreferredSize(new Dimension(infoPanelWidth,1000));
 
 		JPanel selectionModePanel = new JPanel();
-		selectionModePanel.setPreferredSize(new Dimension(350,75));
+		selectionModePanel.setPreferredSize(new Dimension(infoPanelWidth,75));
 		ButtonGroup rbg = new ButtonGroup();
 		rbg.add(rb_click);
 		rbg.add(rb_drag);
@@ -127,9 +129,9 @@ class EditorWindow extends JFrame implements ActionListener{
 		
 		
 		JPanel convertButtons = new JPanel(); 
-		convertButtons.setPreferredSize(new Dimension(350,150));
+		convertButtons.setPreferredSize(new Dimension(infoPanelWidth,150));
 		JLabel convertInfo = new JLabel("   Convert selection to:");
-		convertInfo.setPreferredSize(new Dimension(350,50));
+		convertInfo.setPreferredSize(new Dimension(infoPanelWidth,50));
 		
 		button_tile_free.setBackground(Color.BLACK);
 		button_tile_free.setForeground(Color.LIGHT_GRAY);
@@ -147,13 +149,13 @@ class EditorWindow extends JFrame implements ActionListener{
 		
 		
 		JPanel tileInfoPanel = new JPanel();
-		tileInfoPanel.setPreferredSize(new Dimension(350,125));
+		tileInfoPanel.setPreferredSize(new Dimension(infoPanelWidth,125));
 		tileInfoPanel.setBorder(BorderFactory.createTitledBorder("Tile Information"));
 		tileInfoPanel.add(label_tileInfo);
 		
 		// Map Options
 		JPanel mapPanel = new JPanel();
-		mapPanel.setPreferredSize(new Dimension(350,125));
+		mapPanel.setPreferredSize(new Dimension(infoPanelWidth,125));
 		mapPanel.setBorder(BorderFactory.createTitledBorder("Map Options"));
 		mapPanel.add(button_decreaseZoom);
 		mapPanel.add(button_increaseZoom);
@@ -167,7 +169,7 @@ class EditorWindow extends JFrame implements ActionListener{
 		
 		// file options panel 
 		JPanel fileOptions = new JPanel();
-		fileOptions.setPreferredSize(new Dimension(350,125));
+		fileOptions.setPreferredSize(new Dimension(infoPanelWidth,125));
 		fileOptions.setBorder(BorderFactory.createTitledBorder("File Options"));
 		textField_fileName.setPreferredSize(new Dimension(150,25));
 		textField_fileName.setEditable(false);
@@ -180,7 +182,7 @@ class EditorWindow extends JFrame implements ActionListener{
 		
 		// Map information 
 		JPanel mapInfo = new JPanel();
-		mapInfo.setPreferredSize(new Dimension(350,150));
+		mapInfo.setPreferredSize(new Dimension(infoPanelWidth,150));
 		mapInfo.setBorder(BorderFactory.createTitledBorder("Map Information"));
 		mapInfo.add(label_mapInfo);
 		
@@ -461,7 +463,7 @@ class MapView extends JPanel implements MouseListener, MouseMotionListener{
 	// current map files
 	// the map texture must have the same name as it's .map file
 	// but in PNG format 
-	Image texMap; 
+	Image texMap, texMap_foreground;
 	
 	Tile[][] missionMap;
 	
@@ -475,6 +477,8 @@ class MapView extends JPanel implements MouseListener, MouseMotionListener{
 		
 		// ALWAYS load the map texture
 		texMap = TextureManager.loadImage(missionName);
+		texMap_foreground = TextureManager.loadImage(missionName.replace(".png", "_foreground.png"));
+		
 		if ( texMap == null ) {
 			Log.printErr("MAP_EDITOR", "Error loading map (texMap==null)");
 			return;
@@ -541,8 +545,13 @@ class MapView extends JPanel implements MouseListener, MouseMotionListener{
 	    	  return; 
 	      
 	      // draw map 
-	      if( draw_map && texMap != null )
+	      if( draw_map && texMap != null ){
 	    	  g.drawImage(texMap, 0, 0, (int)(texWidth*zoomLevel), (int)(texHeight*zoomLevel), null);
+	    	  // draw the foreground as well, if there is one 
+	    	  if ( texMap_foreground != null )
+	    		  g.drawImage(texMap_foreground, 0, 0, (int)(texWidth*zoomLevel), (int)(texHeight*zoomLevel), null);
+	    		  
+	      }
 	      
 	      // draw map tiles 
 	      for(int x = 0; x < rect.length ; x ++)
