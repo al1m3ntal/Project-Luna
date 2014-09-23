@@ -52,6 +52,7 @@ import model.TileType;
  * @version 1.00
  * <br><br>
  * This class is only used by the developers to create the map tiles for every mission.
+ * But it is planned to be added to the main game as a level creator. 
  * 
  */
 public class MapEditor {
