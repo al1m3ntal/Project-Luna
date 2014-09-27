@@ -28,11 +28,10 @@ public class Mission {
 	/** List of AI tanks */
 	public List<Tank> aiTanks;
 	
+	public Texture mapBackground; 
+	public Texture mapForeground;
 	
-	public Mission() {
-		// TODO load map tiles from file
-		// TODO create Player tank 
-		// TODO create List of AI tanks
+	public Mission(String missionName) {
 	}
 	
 	

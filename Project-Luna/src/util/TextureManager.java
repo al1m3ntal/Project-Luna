@@ -31,10 +31,9 @@ public class TextureManager {
 		Texture texture = null;
 		try {
 			// load texture from PNG file
-			texture = TextureLoader.getTexture("PNG",
-					ResourceLoader.getResourceAsStream(path));
+			texture = TextureLoader.getTexture("PNG", ResourceLoader.getResourceAsStream(path));
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return texture;

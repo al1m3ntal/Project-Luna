@@ -1,6 +1,8 @@
 package ui;
 
 
+import model.Mission;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -25,6 +27,9 @@ public class Window {
 	/* the controller, which is responsible for all the calculations and upates */
 	private Controller controller;
 	
+	/* The current mission that is being played */
+	private Mission mission; 
+	
 	public Window(Controller controller){
 		this.controller = controller;
 
@@ -34,6 +39,9 @@ public class Window {
 		width = 1920;
 		initGL();
 		
+		// load the assets
+		mission = controller.loadMission(Controller.MISSION_BRIDGE);
+		
 		// game loop 
 		while (!Display.isCloseRequested()){
 			// Clear The Screen And The Depth Buffer
@@ -41,8 +49,6 @@ public class Window {
 					
 			//Draw map first, for it should be in the background for obvious reasons
 			drawMap();
-			drawBullets();
-			drawTanks();
 			
 			// update all game events 
 			controller.update();
@@ -106,8 +112,31 @@ public class Window {
 	 * Draws the map of the controller
 	 */
 	private  void drawMap(){
+		// draw mission background
+		
+		drawImage(	mission.mapBackground, 
+					0, 
+					0, 
+					mission.map.length*20,  // <-- change all the 20's to 10's for original size
+					mission.map[0].length*20, 
+					0f	);
+
+		// TODO draw tanks now 
+		drawTanks();
+		drawBullets();
+		
+		
+		// draw mission foreground 
+		if ( mission.mapForeground != null ) // <--- This IF case serves no purpose, since the system will exit when a texture tries to load that does not exist
+			drawImage(	mission.mapForeground, 
+						0, 
+						0, 
+						mission.map.length*20, 
+						mission.map[0].length*20, 
+						0f	);
 		
 	}
+	
 
 	
 	/**
