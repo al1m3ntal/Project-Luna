@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 
 import model.Mission;
+import model.Tank;
 import model.Tile;
 
 import org.lwjgl.util.vector.Vector2f;
@@ -31,6 +32,8 @@ public class Controller {
 	public static final String MISSION_BRIDGE = "bridge";
 
 
+	//current played mission:
+	private Mission mission;
 	
 	
 	// class name, do not change (except when changing the actual class name)
@@ -46,6 +49,10 @@ public class Controller {
 	// the camera position should be publicly accessible
 	public Vector2f cameraPos;
 	
+	public Controller()
+	{
+		cameraPos = new Vector2f();
+	}
 	
 	/**
 	 * Loads a mission from external files and prepares them for the game Window
@@ -64,6 +71,7 @@ public class Controller {
 		// Load mission map 
 		mission.map = loadMapFile(missionName);
 		
+		this.mission = mission;
 		return mission; 
 	
 	}
@@ -95,8 +103,13 @@ public class Controller {
 	}
 
 	
-	private void updateTank() {
-		// TODO Auto-generated method stub
+	private void updateTank() {		
+		/* player tank */
+		mission.playerTank.update();
+		/* ai tanks */
+		for (Tank tank : mission.aiTanks) {
+			tank.update();
+		}
 	}
 
 	private void updateBullet() {
@@ -108,7 +121,22 @@ public class Controller {
 	}
 	
 	private void updateCamera() {
-		// TODO Auto-generated method stub
+		//TODO get that info from Window? or Init?
+		int height = 1080;
+		int width = 1920;
+		/* set camera on tank */ 
+		cameraPos.x = mission.playerTank.position.x - width/2 + 50/2;	//50/2 for the tank witdh, because at the moment the tank is drawn with size (50,50)...
+		cameraPos.y = mission.playerTank.position.y - height/2 + 50/2;
+		
+		/* if the tanks approaches the end of the map, the camera should not move further */
+		if(cameraPos.x < 0)
+			cameraPos.x = 0;
+		else if(cameraPos.x + width > mission.map.length * 20)
+			cameraPos.x = mission.map.length * 20 - width;
+		if(cameraPos.y < 0)
+			cameraPos.y = 0;
+		else if(cameraPos.y + height > mission.map[0].length * 20)
+			cameraPos.y = mission.map[0].length * 20 - height;
 	}
 	
 	

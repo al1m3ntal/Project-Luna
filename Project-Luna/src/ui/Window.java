@@ -1,9 +1,14 @@
 package ui;
 
 
+import java.awt.Button;
+
 import model.Mission;
+import model.Tank;
+import model.TankStats;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -18,6 +23,8 @@ public class Window {
 	// class name, do not change
 	private final String CLASS = "WINDOW";
 	
+	private final double PI = 3.14159265359;
+	
 	/* Dimensions and properties of this window */
 	private int height;
 	private int width;
@@ -29,6 +36,11 @@ public class Window {
 	
 	/* The current mission that is being played */
 	private Mission mission; 
+	
+	/* tank images */
+	private Texture img_playertank_base;
+	private Texture img_playertank_turret;
+
 	
 	public Window(Controller controller){
 		this.controller = controller;
@@ -42,10 +54,15 @@ public class Window {
 		// load the assets
 		mission = controller.loadMission(Controller.MISSION_BRIDGE);
 		
+		mission.playerTank = new Tank(new TankStats(0));
+		img_playertank_base = util.TextureManager.load("res/tanks/tank1base.png");
+		img_playertank_turret = util.TextureManager.load("res/tanks/tank1turret.png");
+		
 		// game loop 
 		while (!Display.isCloseRequested()){
 			// Clear The Screen And The Depth Buffer
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+			pollInput();
 					
 			//Draw map first, for it should be in the background for obvious reasons
 			drawMap();
@@ -98,7 +115,10 @@ public class Window {
 	 * Draws all the tanks of the controller
 	 */
 	private void drawTanks(){
-		
+		/* draw base */
+		drawImage(img_playertank_base, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 100, 100, mission.playerTank.rotBase);
+		/* draw turret */
+		drawImage(img_playertank_turret, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 100, 100,  mission.playerTank.rotTurret);
 	}
 	
 	/**
@@ -115,8 +135,8 @@ public class Window {
 		// draw mission background
 		
 		drawImage(	mission.mapBackground, 
-					0, 
-					0, 
+					0 - (int)controller.cameraPos.x, 
+					0 - (int)controller.cameraPos.y, 
 					mission.map.length*20,  // <-- change all the 20's to 10's for original size
 					mission.map[0].length*20, 
 					0f	);
@@ -129,8 +149,8 @@ public class Window {
 		// draw mission foreground 
 		if ( mission.mapForeground != null ) // <--- This IF case serves no purpose, since the system will exit when a texture tries to load that does not exist
 			drawImage(	mission.mapForeground, 
-						0, 
-						0, 
+						0 - (int)controller.cameraPos.x, 
+						0 - (int)controller.cameraPos.y, 
 						mission.map.length*20, 
 						mission.map[0].length*20, 
 						0f	);
@@ -151,6 +171,23 @@ public class Window {
 			int y = height - Mouse.getY();
 			//TODO do something with it
 		}
+		/* driving */
+		if(Keyboard.isKeyDown(Keyboard.KEY_W))
+		{
+			mission.playerTank.speed.x += Math.sin(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration();		
+			mission.playerTank.speed.y -= Math.cos(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration();
+		}		
+		else if(Keyboard.isKeyDown(Keyboard.KEY_S))
+		{
+			mission.playerTank.speed.x -= Math.sin(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration();		
+			mission.playerTank.speed.y += Math.cos(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration();			
+		}	
+		/* rotation */
+		if(Keyboard.isKeyDown(Keyboard.KEY_A))
+			mission.playerTank.rotBase -= 3.0f;
+		else if(Keyboard.isKeyDown(Keyboard.KEY_D))
+			mission.playerTank.rotBase += 3.0f;
+		
 	}
 	
 	/**

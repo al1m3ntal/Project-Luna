@@ -38,6 +38,25 @@ public class Tank {
 	 */
 	public Tank(TankStats stats){
 		this.stats = stats;
+		position = new Vector2f(150,850);
+		speed = new Vector2f(0,0);
+	}
+	
+	/**
+     * Updates the tanks position, speed and rotation
+	 */
+	public void update(){
+		position.x += speed.x;
+		position.y += speed.y;
+		//bleed of the speed over time
+		speed.x *= 0.90f;
+		speed.y *= 0.90f;
+		
+		//rotation should be between 0 - 359 degrees (tbh it probably doesnt matter)
+		if(rotBase < 0)
+			rotBase += 360;
+		else if(rotBase >= 360)
+			rotBase -= 360;
 	}
 
 	

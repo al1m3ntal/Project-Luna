@@ -1,5 +1,6 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.newdawn.slick.opengl.Texture;
@@ -32,6 +33,7 @@ public class Mission {
 	public Texture mapForeground;
 	
 	public Mission(String missionName) {
+		aiTanks = new ArrayList<Tank>();
 	}
 	
 	
