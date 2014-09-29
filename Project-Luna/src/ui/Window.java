@@ -8,6 +8,7 @@ import model.Tank;
 import model.TankStats;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -24,6 +25,10 @@ public class Window {
 	private final String CLASS = "WINDOW";
 	
 	private final double PI = 3.14159265359;
+	
+	/* time at last frame */
+	long lastFrame;
+
 	
 	/* Dimensions and properties of this window */
 	private int height;
@@ -58,17 +63,20 @@ public class Window {
 		img_playertank_base = util.TextureManager.load("res/tanks/tank1base.png");
 		img_playertank_turret = util.TextureManager.load("res/tanks/tank1turret.png");
 		
+		//set time for first frame:
+		getDelta(); // call once before loop to initialise lastFrame
+		
 		// game loop 
 		while (!Display.isCloseRequested()){
 			// Clear The Screen And The Depth Buffer
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-			pollInput();
+			pollInput(getDelta());
 					
 			//Draw map first, for it should be in the background for obvious reasons
 			drawMap();
 			
 			// update all game events 
-			controller.update();
+			controller.update(getDelta());
 			// update the display 
 			Display.update();			
 		}
@@ -116,9 +124,9 @@ public class Window {
 	 */
 	private void drawTanks(){
 		/* draw base */
-		drawImage(img_playertank_base, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 100, 100, mission.playerTank.rotBase);
+		drawImage(img_playertank_base, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 300, 300, mission.playerTank.rotBase);
 		/* draw turret */
-		drawImage(img_playertank_turret, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 100, 100,  mission.playerTank.rotTurret);
+		drawImage(img_playertank_turret, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 300, 300,  mission.playerTank.rotTurret);
 	}
 	
 	/**
@@ -164,7 +172,7 @@ public class Window {
 	 * 0/0 should be in the top-left corner, but is in the bottom-left
 	 * therefore convert it properly
 	 */
-	private void pollInput() {
+	private void pollInput(int deltaT) {
 		//Left MouseButton clicked
 		if (Mouse.isButtonDown(0)) {
 			int x = Mouse.getX();
@@ -174,19 +182,19 @@ public class Window {
 		/* driving */
 		if(Keyboard.isKeyDown(Keyboard.KEY_W))
 		{
-			mission.playerTank.speed.x += Math.sin(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration();		
-			mission.playerTank.speed.y -= Math.cos(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration();
+			mission.playerTank.speed.x += Math.sin(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration() * deltaT;		
+			mission.playerTank.speed.y -= Math.cos(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration() * deltaT;
 		}		
 		else if(Keyboard.isKeyDown(Keyboard.KEY_S))
 		{
-			mission.playerTank.speed.x -= Math.sin(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration();		
-			mission.playerTank.speed.y += Math.cos(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration();			
+			mission.playerTank.speed.x -= Math.sin(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration() * deltaT;		
+			mission.playerTank.speed.y += Math.cos(mission.playerTank.rotBase*PI/180) * mission.playerTank.stats.getAccleration() * deltaT;			
 		}	
 		/* rotation */
 		if(Keyboard.isKeyDown(Keyboard.KEY_A))
-			mission.playerTank.rotBase -= 3.0f;
+			mission.playerTank.rotBase -= mission.playerTank.stats.getRotSpeedBase() * deltaT;
 		else if(Keyboard.isKeyDown(Keyboard.KEY_D))
-			mission.playerTank.rotBase += 3.0f;
+			mission.playerTank.rotBase += mission.playerTank.stats.getRotSpeedBase() * deltaT;
 		
 	}
 	
@@ -221,6 +229,32 @@ public class Window {
 		
 		// restore the model view matrix to prevent contamination
 		GL11.glPopMatrix();
+	}
+	
+	/**
+	 * Get the time in milliseconds
+	 * 
+	 * @return The system time in miliseconds
+	 */
+	public long getTime() {
+		//return (Sys.getTime() * 1000) / Sys.getTimerResolution();
+		return System.nanoTime() / 1000000;
+	}
+	
+	/**
+	 * calculates the time since the last update
+	 * in milliseconds
+	 * 
+	 * RETURNS 1 BECAUSE SHIT DOES NOT WORK
+	 * @return
+	 */
+	public int getDelta() {
+	    long time = getTime();
+	    int delta = (int) (time - lastFrame);
+	    lastFrame = time;
+
+	   // return delta;	   
+	    return 1;
 	}
 	
 	

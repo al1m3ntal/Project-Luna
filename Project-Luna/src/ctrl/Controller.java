@@ -94,25 +94,26 @@ public class Controller {
 	
 	/**
 	 * Main update method, should be called every game time update
+	 * gets the deltaT time in milliseconds
 	 */
-	public void update(){
-		updateTank();
-		updateBullet();
+	public void update(int deltaT){
+		updateTank(deltaT);
+		updateBullet(deltaT);
 		updateAI();
 		updateCamera();
 	}
 
 	
-	private void updateTank() {		
+	private void updateTank(int deltaT) {		
 		/* player tank */
-		mission.playerTank.update();
+		mission.playerTank.update(deltaT);
 		/* ai tanks */
 		for (Tank tank : mission.aiTanks) {
-			tank.update();
+			tank.update(deltaT);
 		}
 	}
 
-	private void updateBullet() {
+	private void updateBullet(int deltaT) {
 		// TODO Auto-generated method stub
 	}
 
@@ -125,8 +126,8 @@ public class Controller {
 		int height = 1080;
 		int width = 1920;
 		/* set camera on tank */ 
-		cameraPos.x = mission.playerTank.position.x - width/2 + 50/2;	//50/2 for the tank witdh, because at the moment the tank is drawn with size (50,50)...
-		cameraPos.y = mission.playerTank.position.y - height/2 + 50/2;
+		cameraPos.x = mission.playerTank.position.x - width/2 + 300/2;	//50/2 for the tank witdh, because at the moment the tank is drawn with size (50,50)...
+		cameraPos.y = mission.playerTank.position.y - height/2 + 300/2;
 		
 		/* if the tanks approaches the end of the map, the camera should not move further */
 		if(cameraPos.x < 0)

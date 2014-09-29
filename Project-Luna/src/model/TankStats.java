@@ -42,7 +42,7 @@ public class TankStats {
 			default:
 			case 0:
 				maxSpeed 		= 50;
-				rotSpeedBase 	= 15;
+				rotSpeedBase 	= 5;
 				rotSpeedTurret	= 20;
 				hp 				= 100;
 				damage 			= 25;
@@ -52,7 +52,7 @@ public class TankStats {
 			
 			case 1:
 				maxSpeed 		= 75;
-				rotSpeedBase 	= 25;
+				rotSpeedBase 	= 8;
 				rotSpeedTurret	= 35;
 				hp 				= 75;
 				damage 			= 15;

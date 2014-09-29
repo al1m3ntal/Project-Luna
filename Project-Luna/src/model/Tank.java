@@ -44,13 +44,14 @@ public class Tank {
 	
 	/**
      * Updates the tanks position, speed and rotation
+     * gets the deltaT time in seconds
 	 */
-	public void update(){
-		position.x += speed.x;
-		position.y += speed.y;
+	public void update(double deltaT){
+		position.x += speed.x;// * deltaT;
+		position.y += speed.y;// * deltaT;
 		//bleed of the speed over time
-		speed.x *= 0.90f;
-		speed.y *= 0.90f;
+		speed.x *= 0.9f;
+		speed.y *= 0.9f;
 		
 		//rotation should be between 0 - 359 degrees (tbh it probably doesnt matter)
 		if(rotBase < 0)
