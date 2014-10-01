@@ -2,6 +2,7 @@ package ui;
 
 
 import java.awt.Button;
+import java.util.Vector;
 
 import model.Mission;
 import model.Tank;
@@ -14,6 +15,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.opengl.Texture;
 
 import ctrl.Controller;
@@ -60,9 +62,12 @@ public class Window {
 		mission = controller.loadMission(Controller.MISSION_BRIDGE);
 		
 		mission.playerTank = new Tank(new TankStats(0));
-		img_playertank_base = util.TextureManager.load("res/tanks/tank1base.png");
-		img_playertank_turret = util.TextureManager.load("res/tanks/tank1turret.png");
-		
+//		img_playertank_base = util.TextureManager.load("res/tanks/tank1base.png");
+//		img_playertank_turret = util.TextureManager.load("res/tanks/tank1turret.png");
+
+		img_playertank_base = util.TextureManager.load("res/tanks/tank2base.png");
+		img_playertank_turret = util.TextureManager.load("res/tanks/tank2turret.png");
+
 		//set time for first frame:
 		getDelta(); // call once before loop to initialise lastFrame
 		
@@ -173,10 +178,16 @@ public class Window {
 	 * therefore convert it properly
 	 */
 	private void pollInput(int deltaT) {
+		
+		
+		calcTurretRotation(	Mouse.getX(),
+							height - Mouse.getY(), 
+							(int)mission.playerTank.position.x - (int)controller.cameraPos.x, 
+							(int)mission.playerTank.position.y - (int)controller.cameraPos.y);
+		
+		
 		//Left MouseButton clicked
 		if (Mouse.isButtonDown(0)) {
-			int x = Mouse.getX();
-			int y = height - Mouse.getY();
 			//TODO do something with it
 		}
 		/* driving */
@@ -231,10 +242,84 @@ public class Window {
 		GL11.glPopMatrix();
 	}
 	
+	private void drawLine(float x, float y, float x2, float y2) {
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+	    GL11.glColor3f(0.0f, 1.0f, 0.2f);
+	    GL11.glBegin(GL11.GL_LINES);
+
+	    GL11.glVertex2d(x , y );
+	    GL11.glVertex2d(x2, x2);
+	    GL11.glEnd();
+	    GL11.glColor3f(1.0f, 1.0f, 1.0f);
+	}
+	
+	
+	/**
+	 * Calculates the current turret rotation by creating 2 vectors and getting the angle between them
+	 * @param mouseX
+	 * @param mouseY
+	 * @param tankY
+	 * @param tankX
+	 */
+	private void calcTurretRotation(int mouseX, int mouseY, int tankX, int tankY){
+		// need 2 vectors and calculate the angle between them for the rotation
+		// 1st vector is a (1,0) vector originating from the tank's current position (or (-1,0) if the pointer is below the tank)
+		// 2nd vector is the current mouse pointer in relation to the turret location
+		// This vector is of type slick (not lwglj.util)
+		Vector2f vector1 = new Vector2f();
+		Vector2f vector2 = new Vector2f();
+
+		int heightDiff = 0; 
+		int widthDiff  = 0;
+		int widthMultiplier = 0; 
+		
+		
+		// calculate 1st vector 
+		heightDiff = tankY- mouseY + 150;
+		if ( heightDiff > 0)
+			vector1.y = 1;
+		if ( heightDiff < 0)
+			vector1.y = -1;
+		
+
+		// get the height difference between the mouse pointer and the current tank position 
+		vector2.y = vector1.y * Math.abs(tankY - mouseY + 150);
+
+		// get the x difference between the mouse pointer and the current tank position 
+		widthDiff = tankX - mouseX + 150;
+		if ( widthDiff > 0)
+			widthMultiplier = -1;
+		if ( widthDiff < 0 )
+			widthMultiplier = 1;
+		
+		// set the x position for the vectors
+		vector2.x = widthMultiplier * Math.abs(tankX - mouseX + 150);
+		vector1.x = tankX;
+		
+		//System.out.println("    1:" + vector1.x + " | " + vector1.y + "    2: " + vector2.x + " | " + vector2.y );
+		
+		// calculate the turret rotation
+		// see http://www.vitutor.com/geometry/vec/angle_vectors.html
+		float temp1 = (vector1.x * vector2.x + vector1.y * vector2.y);
+		float temp2 = (float) (Math.sqrt(Math.pow(vector1.x, 2) + Math.pow(vector1.y, 2)));
+		float temp3 = (float) (Math.sqrt(Math.pow(vector2.x, 2) + Math.pow(vector2.y, 2)));
+		
+		mission.playerTank.rotTurret = (float) Math.cos(temp1/(temp2*temp3));
+		// get the rotation in degrees
+		mission.playerTank.rotTurret *= 180/PI;
+		
+		// draw this on screen for debugging purposes 
+		//drawLine(0,0, vector2.x, vector2.y);
+		
+		
+		//System.out.println(mission.playerTank.rotTurret);
+	}
+	
+	
 	/**
 	 * Get the time in milliseconds
 	 * 
-	 * @return The system time in miliseconds
+	 * @return The system time in milliseconds
 	 */
 	public long getTime() {
 		//return (Sys.getTime() * 1000) / Sys.getTimerResolution();
