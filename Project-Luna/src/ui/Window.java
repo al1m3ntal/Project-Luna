@@ -243,10 +243,9 @@ public class Window {
 	}
 	
 	private void drawLine(float x, float y, float x2, float y2) {
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+		//GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 	    GL11.glColor3f(0.0f, 1.0f, 0.2f);
-	    GL11.glBegin(GL11.GL_LINES);
-
+	    GL11.glBegin(GL11.GL_LINE_STRIP);
 	    GL11.glVertex2d(x , y );
 	    GL11.glVertex2d(x2, x2);
 	    GL11.glEnd();
@@ -269,50 +268,88 @@ public class Window {
 		Vector2f vector1 = new Vector2f();
 		Vector2f vector2 = new Vector2f();
 
-		int heightDiff = 0; 
-		int widthDiff  = 0;
-		int widthMultiplier = 0; 
+		int deltaY = 0; 
+		int deltaX  = 0;
+		int directionX = 0; 
+		int directionY = 0; 
 		
 		
-		// calculate 1st vector 
-		heightDiff = tankY- mouseY + 150;
-		if ( heightDiff > 0)
-			vector1.y = 1;
-		if ( heightDiff < 0)
-			vector1.y = -1;
-		
+		// calculate the differences in height and width
+		deltaY = tankY - mouseY + 150;
+		deltaX = tankX - mouseX + 150;
 
+		if ( deltaY > 0)
+			directionY = 1;
+		if ( deltaY < 0)
+			directionY = -1;
+		
+		vector1.y = directionY;
 		// get the height difference between the mouse pointer and the current tank position 
-		vector2.y = vector1.y * Math.abs(tankY - mouseY + 150);
+		vector2.y = directionY * Math.abs(tankY - mouseY + 150);
 
 		// get the x difference between the mouse pointer and the current tank position 
-		widthDiff = tankX - mouseX + 150;
-		if ( widthDiff > 0)
-			widthMultiplier = -1;
-		if ( widthDiff < 0 )
-			widthMultiplier = 1;
+		if ( deltaX > 0)
+			directionX = -1;
+		if ( deltaX < 0 )
+			directionX = 1;
 		
 		// set the x position for the vectors
-		vector2.x = widthMultiplier * Math.abs(tankX - mouseX + 150);
-		vector1.x = tankX;
+		vector2.x = directionX * Math.abs(tankX - mouseX + 150);
+		vector1.x = 0;
 		
-		//System.out.println("    1:" + vector1.x + " | " + vector1.y + "    2: " + vector2.x + " | " + vector2.y );
+	//	System.out.println("V1:("+ vector1.x + ", " + vector1.y +") V2:(" + vector2.x + ", " + vector2.y+")");
+		mission.playerTank.rotTurret =  (float) Math.toDegrees(Math.atan2(deltaY, deltaX));
 		
 		// calculate the turret rotation
+		
+		/*
+		
 		// see http://www.vitutor.com/geometry/vec/angle_vectors.html
-		float temp1 = (vector1.x * vector2.x + vector1.y * vector2.y);
-		float temp2 = (float) (Math.sqrt(Math.pow(vector1.x, 2) + Math.pow(vector1.y, 2)));
+//		float temp1 = (vector1.x * vector2.x + vector1.y * vector2.y);
+//		float temp2 = (float) (Math.sqrt(Math.pow(vector1.x, 2) + Math.pow(vector1.y, 2)));
+//		float temp3 = (float) (Math.sqrt(Math.pow(vector2.x, 2) + Math.pow(vector2.y, 2)));
+		float temp1 = vector2.y;
+		float temp2 = (float) (Math.sqrt(Math.pow(vector1.y, 2)));
 		float temp3 = (float) (Math.sqrt(Math.pow(vector2.x, 2) + Math.pow(vector2.y, 2)));
 		
-		mission.playerTank.rotTurret = (float) Math.cos(temp1/(temp2*temp3));
-		// get the rotation in degrees
-		mission.playerTank.rotTurret *= 180/PI;
-		
-		// draw this on screen for debugging purposes 
-		//drawLine(0,0, vector2.x, vector2.y);
+		System.out.println("temp1   "  + temp1);
+		System.out.println("temp2   "  + temp2);
+		System.out.println("temp3   "  + temp3);
+		*/
 		
 		
-		//System.out.println(mission.playerTank.rotTurret);
+		/*
+		 * Vector2f gunLocation = gun.getLocation();
+float xDistance = mouseX - gunLocation.x;
+float yDistance = mouseY - gunLocation.y;
+double angleToTurn = Math.toDegrees(Math.atan2(yDistance, xDistance));
+gunImage.setRotation((float)angleToTurn);
+		 * 
+		 */
+		
+		
+		
+		
+		// radians
+//		float rad = (float) Math.toRadians(temp1/(temp2*temp3));
+//		float rotation = (float) Math.toDegrees((float) Math.acos(rad));
+//		mission.playerTank.rotTurret = (float) Math.toDegrees(rotation);
+//		
+		
+		// upper right
+		if ( directionX == 1 && vector1.y == 1){
+		}
+		// upper left
+		if ( directionX == -1 && vector1.y == 1){
+		}
+		// lower right
+		if ( directionX == 1 && vector1.y == -1){
+		}
+		// lower left
+		if ( directionX == -1 && vector1.y == -1){
+		}
+		
+		
 	}
 	
 	
