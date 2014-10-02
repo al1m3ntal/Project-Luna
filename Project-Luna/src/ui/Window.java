@@ -297,57 +297,8 @@ public class Window {
 		vector2.x = directionX * Math.abs(tankX - mouseX + 150);
 		vector1.x = 0;
 		
-	//	System.out.println("V1:("+ vector1.x + ", " + vector1.y +") V2:(" + vector2.x + ", " + vector2.y+")");
-		mission.playerTank.rotTurret =  (float) Math.toDegrees(Math.atan2(deltaY, deltaX));
-		
 		// calculate the turret rotation
-		
-		/*
-		
-		// see http://www.vitutor.com/geometry/vec/angle_vectors.html
-//		float temp1 = (vector1.x * vector2.x + vector1.y * vector2.y);
-//		float temp2 = (float) (Math.sqrt(Math.pow(vector1.x, 2) + Math.pow(vector1.y, 2)));
-//		float temp3 = (float) (Math.sqrt(Math.pow(vector2.x, 2) + Math.pow(vector2.y, 2)));
-		float temp1 = vector2.y;
-		float temp2 = (float) (Math.sqrt(Math.pow(vector1.y, 2)));
-		float temp3 = (float) (Math.sqrt(Math.pow(vector2.x, 2) + Math.pow(vector2.y, 2)));
-		
-		System.out.println("temp1   "  + temp1);
-		System.out.println("temp2   "  + temp2);
-		System.out.println("temp3   "  + temp3);
-		*/
-		
-		
-		/*
-		 * Vector2f gunLocation = gun.getLocation();
-float xDistance = mouseX - gunLocation.x;
-float yDistance = mouseY - gunLocation.y;
-double angleToTurn = Math.toDegrees(Math.atan2(yDistance, xDistance));
-gunImage.setRotation((float)angleToTurn);
-		 * 
-		 */
-		
-		
-		
-		
-		// radians
-//		float rad = (float) Math.toRadians(temp1/(temp2*temp3));
-//		float rotation = (float) Math.toDegrees((float) Math.acos(rad));
-//		mission.playerTank.rotTurret = (float) Math.toDegrees(rotation);
-//		
-		
-		// upper right
-		if ( directionX == 1 && vector1.y == 1){
-		}
-		// upper left
-		if ( directionX == -1 && vector1.y == 1){
-		}
-		// lower right
-		if ( directionX == 1 && vector1.y == -1){
-		}
-		// lower left
-		if ( directionX == -1 && vector1.y == -1){
-		}
+		mission.playerTank.rotTurret =  (float) Math.toDegrees(Math.atan2(deltaY, deltaX)) +270;
 		
 		
 	}
