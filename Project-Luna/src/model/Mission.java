@@ -29,6 +29,9 @@ public class Mission {
 	/** List of AI tanks */
 	public List<Tank> aiTanks;
 	
+	/** List of all current projectiles on the map */
+	public ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
+	
 	public Texture mapBackground; 
 	public Texture mapForeground;
 	

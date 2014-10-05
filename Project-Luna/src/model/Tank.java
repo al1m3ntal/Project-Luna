@@ -30,6 +30,9 @@ public class Tank {
 	public Vector2f position;
 	// Tank stats that is used by this tank 
 	public TankStats stats;
+	// time the last shot was fired (temporary value)
+	public long lastShotFired;
+	
 
 	
 	/**

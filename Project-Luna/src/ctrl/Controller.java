@@ -6,9 +6,11 @@ import java.io.ObjectInputStream;
 
 import model.Mission;
 import model.Tank;
+import model.TankStats;
 import model.Tile;
 
 import org.lwjgl.util.vector.Vector2f;
+import org.newdawn.slick.opengl.Texture;
 
 import util.TextureManager;
 
@@ -35,6 +37,9 @@ public class Controller {
 	//current played mission:
 	private Mission mission;
 	
+	// Projectile textures (The texture is in accordance with the projectile type)
+	public Texture[] texProjectile = new Texture[3];
+	
 	
 	// class name, do not change (except when changing the actual class name)
 	private final String CLASS = "CONTROLLER";
@@ -44,13 +49,17 @@ public class Controller {
 	/** Current state of the game (see {@link GameState})*/
 	public GameState gameState;
 		
+	
+	
+	
+	
+	
 
 	/** Current camera position as represented by a {@link Vector2f} */
 	// the camera position should be publicly accessible
 	public Vector2f cameraPos;
 	
-	public Controller()
-	{
+	public Controller()	{
 		cameraPos = new Vector2f();
 	}
 	
@@ -70,11 +79,27 @@ public class Controller {
 		
 		// Load mission map 
 		mission.map = loadMapFile(missionName);
+		// load tanks and such 
+		mission.playerTank = new Tank(new TankStats(0));
+		mission.playerTank.texBase = util.TextureManager.load("res/tanks/tank2base.png");
+		mission.playerTank.texTurret = util.TextureManager.load("res/tanks/tank2turret.png");
 		
-		this.mission = mission;
+		// load the projectile textures
+		// TODO add the other textures for the different projectile types 
+		texProjectile[0] = TextureManager.load("res/projectiles/bullet.png");
+		texProjectile[1] = TextureManager.load("res/projectiles/bullet.png");
+		texProjectile[2] = TextureManager.load("res/projectiles/bullet.png");
+		
+		// TODO load AI tanks 
+		
+
+		
+		
+		this.mission = mission; //? what is this ? 
 		return mission; 
 	
 	}
+	
 	
 	private Tile[][] loadMapFile(String missionName){
 		try{
@@ -114,7 +139,7 @@ public class Controller {
 	}
 
 	private void updateBullet(int deltaT) {
-		// TODO Auto-generated method stub
+		// TODO
 	}
 
 	private void updateAI() {

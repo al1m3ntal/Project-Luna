@@ -5,6 +5,7 @@ import java.awt.Button;
 import java.util.Vector;
 
 import model.Mission;
+import model.Projectile;
 import model.Tank;
 import model.TankStats;
 
@@ -44,10 +45,6 @@ public class Window {
 	/* The current mission that is being played */
 	private Mission mission; 
 	
-	/* tank images */
-	private Texture img_playertank_base;
-	private Texture img_playertank_turret;
-
 	
 	public Window(Controller controller){
 		this.controller = controller;
@@ -58,18 +55,14 @@ public class Window {
 		width = 1920;
 		initGL();
 		
+		
+		// LOAD A TEST MISSION FOR NOW 
+		
 		// load the assets
 		mission = controller.loadMission(Controller.MISSION_BRIDGE);
-		
-		mission.playerTank = new Tank(new TankStats(0));
-//		img_playertank_base = util.TextureManager.load("res/tanks/tank1base.png");
-//		img_playertank_turret = util.TextureManager.load("res/tanks/tank1turret.png");
-
-		img_playertank_base = util.TextureManager.load("res/tanks/tank2base.png");
-		img_playertank_turret = util.TextureManager.load("res/tanks/tank2turret.png");
 
 		//set time for first frame:
-		getDelta(); // call once before loop to initialise lastFrame
+		getDelta(); // call once before loop to initialize lastFrame
 		
 		// game loop 
 		while (!Display.isCloseRequested()){
@@ -129,16 +122,39 @@ public class Window {
 	 */
 	private void drawTanks(){
 		/* draw base */
-		drawImage(img_playertank_base, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 300, 300, mission.playerTank.rotBase);
+		drawImage(mission.playerTank.texBase, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 300, 300, mission.playerTank.rotBase);
 		/* draw turret */
-		drawImage(img_playertank_turret, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 300, 300,  mission.playerTank.rotTurret);
+		drawImage(mission.playerTank.texTurret, (int)(mission.playerTank.position.x - controller.cameraPos.x), (int)(mission.playerTank.position.y - controller.cameraPos.y), 300, 300,  mission.playerTank.rotTurret);
 	}
 	
 	/**
-	 * Draws all the bullets of the controller
+	 * Draws all the bullets of the mission
 	 */
 	private void drawBullets(){
-		
+		// iterate through the list of projectiles
+		for (Projectile	p : mission.projectiles) {
+			
+			// TODO p.update() should come somewhere else ? (e.g. in the game loop, not in the draw method)
+			p.update();
+
+			// if the projectile got destroyed or went out of bounds then we delete it
+			if (p.position.x < 0 || p.position.y < 0 || p.position.x > mission.map.length*20 || p.position.y > mission.map[0].length*20){
+				p = null;
+			}
+			
+
+			if ( p == null )
+				continue;
+			
+			
+			// draw the projectile
+			drawImage(	controller.texProjectile[p.type], 
+						(int)p.position.x, 
+						(int)p.position.y, 
+						p.size, // TODO fix size 
+						p.size, // TODO fix size
+						p.rotation);
+		}
 	}
 
 	/**
@@ -180,15 +196,33 @@ public class Window {
 	private void pollInput(int deltaT) {
 		
 		
-		calcTurretRotation(	Mouse.getX(),
-							height - Mouse.getY(), 
-							(int)mission.playerTank.position.x - (int)controller.cameraPos.x, 
-							(int)mission.playerTank.position.y - (int)controller.cameraPos.y);
+		calcTurretRotationV2(	Mouse.getX(),
+								height - Mouse.getY(), 
+								(int)mission.playerTank.position.x - (int)controller.cameraPos.x, 
+								(int)mission.playerTank.position.y - (int)controller.cameraPos.y);
 		
 		
 		//Left MouseButton clicked
 		if (Mouse.isButtonDown(0)) {
-			//TODO do something with it
+			// shoot !
+			// get the current time 
+			long currentTime = System.currentTimeMillis();
+			System.out.println("Still waiting " + ( mission.playerTank.lastShotFired - currentTime + 2500) + " for gun cooldown");
+			if ( currentTime > mission.playerTank.lastShotFired + mission.playerTank.stats.getReloadTime()){
+				System.out.println("Shoot !");
+				mission.playerTank.lastShotFired = currentTime;
+				
+				// add the projectile to the list of mission projectiles 
+				mission.projectiles.add(new Projectile(	mission.playerTank.stats.getProjectileType(), 
+														(int)mission.playerTank.position.x - (int)controller.cameraPos.x +150,
+														(int)mission.playerTank.position.y - (int)controller.cameraPos.y +150,
+														mission.playerTank.rotTurret));
+				
+			}
+			
+			
+			
+			
 		}
 		/* driving */
 		if(Keyboard.isKeyDown(Keyboard.KEY_W))
@@ -253,7 +287,19 @@ public class Window {
 	}
 	
 	
+	private void calcTurretRotationV2(int mouseX, int mouseY, int tankX, int tankY){
+		// calculate the differences in height and width
+		int deltaY = tankY - mouseY + 150;
+		int deltaX = tankX - mouseX + 150;
+		// calculate the turret rotation
+		mission.playerTank.rotTurret =  (float) Math.toDegrees(Math.atan2(deltaY, deltaX)) +270;
+	}
+	
+	
+	
+	
 	/**
+	 * USE calcTurretRotationV2 instead (faster by like 0.0000001 seconds)
 	 * Calculates the current turret rotation by creating 2 vectors and getting the angle between them
 	 * @param mouseX
 	 * @param mouseY

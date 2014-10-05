@@ -30,6 +30,8 @@ public class TankStats {
 	private int reloadTime;
 	// speed at which a tank can accelerate to get up to maxSpeed
 	private float accleration;
+	// type of projectiles this tank shoots 
+	private int projectileType; 
 	
 	/**
 	 * Creates a TankStats object from scratch.
@@ -48,6 +50,7 @@ public class TankStats {
 				damage 			= 25;
 				reloadTime 		= 2500;
 				accleration 	= 0.5f;
+				projectileType  = Projectile.PROJECTILE_SHELL;
 				break;
 			
 			case 1:
@@ -58,6 +61,7 @@ public class TankStats {
 				damage 			= 15;
 				reloadTime 		= 1750;
 				accleration 	= 0.75f;
+				projectileType  = Projectile.PROJECTILE_SHELL;
 				break;
 		}
 	}
@@ -96,6 +100,9 @@ public class TankStats {
 		return accleration;
 	}
 	
+	public int getProjectileType(){
+		return this.projectileType;
+	}
 	
 	
 	
