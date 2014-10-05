@@ -149,8 +149,8 @@ public class Window {
 			
 			// draw the projectile
 			drawImage(	controller.texProjectile[p.type], 
-						(int)p.position.x, 
-						(int)p.position.y, 
+						(int)(p.position.x - controller.cameraPos.x), 
+						(int)(p.position.y - controller.cameraPos.y), 
 						p.size, // TODO fix size 
 						p.size, // TODO fix size
 						p.rotation);
@@ -214,8 +214,8 @@ public class Window {
 				
 				// add the projectile to the list of mission projectiles 
 				mission.projectiles.add(new Projectile(	mission.playerTank.stats.getProjectileType(), 
-														(int)mission.playerTank.position.x - (int)controller.cameraPos.x +150,
-														(int)mission.playerTank.position.y - (int)controller.cameraPos.y +150,
+														(int)mission.playerTank.position.x +150,
+														(int)mission.playerTank.position.y +150,
 														mission.playerTank.rotTurret));
 				
 			}
