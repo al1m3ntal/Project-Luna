@@ -59,24 +59,40 @@ public class Tank {
 			for (Tile tile : top) {
 				if(tile.type == TileType.OBSTACLE)
 					speed.y = 0;
+				else if(tile.type == TileType.HAZARD)
+					speed.y *= 0.98;
+				else if(tile.type == TileType.WATER)
+					speed.y *= 0.96;
 			}
 		else if(speed.y > 0)
 			// check if tiles to the right
 			for (Tile tile : bottom) {
 				if(tile.type == TileType.OBSTACLE)
 					speed.y = 0;
+				else if(tile.type == TileType.HAZARD)
+					speed.y *= 0.98;
+				else if(tile.type == TileType.WATER)
+					speed.y *= 0.96;
 			}
 		if(speed.x > 0)
 			// check if tiles to the right
 			for (Tile tile : right) {
 				if(tile.type == TileType.OBSTACLE)
 					speed.x = 0;
+				else if(tile.type == TileType.HAZARD)
+					speed.x *= 0.98;
+				else if(tile.type == TileType.WATER)
+					speed.x *= 0.96;
 			}
 		else if(speed.x < 0)
 			// check if tiles to the left
 				for (Tile tile : left) {
 					if(tile.type == TileType.OBSTACLE)
 						speed.x = 0;
+					else if(tile.type == TileType.HAZARD)
+						speed.x *= 0.98;
+					else if(tile.type == TileType.WATER)
+						speed.x *= 0.96;
 				}
 		
 		position.x += speed.x;// * deltaT;

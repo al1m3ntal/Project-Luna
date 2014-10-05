@@ -134,34 +134,18 @@ public class Controller {
 	
 	private void updateTank(int deltaT) {		
 		/* player tank */
-		List<Tile> toptiles = new ArrayList<Tile>();
-		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
-		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
-		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
-		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
-		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
-		List<Tile> righttiles = new ArrayList<Tile>();
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +6]);
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +7]);
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +8]);
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +9]);
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +10]);
-		List<Tile> bottomtiles = new ArrayList<Tile>();
-		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +6]);
-		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +7]);
-		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +8]);
-		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +9]);
-		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +10]);
-		List<Tile> lefttiles = new ArrayList<Tile>();
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +6]);
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +7]);
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +8]);
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +9]);
-		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +10]);
-		mission.playerTank.update(deltaT, toptiles, righttiles, bottomtiles, lefttiles);
+		mission.playerTank.update(deltaT
+				, calcColissionTiles_top(mission.playerTank)
+				, calcColissionTiles_right(mission.playerTank)
+				, calcColissionTiles_bottom(mission.playerTank)
+				, calcColissionTiles_left(mission.playerTank));
 		/* ai tanks */
 		for (Tank tank : mission.aiTanks) {
-			tank.update(deltaT, new ArrayList<Tile>(), new ArrayList<Tile>(), new ArrayList<Tile>(), new ArrayList<Tile>());	//TODO
+			tank.update(deltaT
+					, calcColissionTiles_top(tank)
+					, calcColissionTiles_right(tank)
+					, calcColissionTiles_bottom(tank)
+					, calcColissionTiles_left(tank));
 		}
 	}
 
@@ -194,6 +178,159 @@ public class Controller {
 			cameraPos.y = mission.map[0].length * 20 - height;
 	}
 	
+		
+	private List<Tile> calcColissionTiles_top(Tank tank)
+	{
+		List<Tile> tiles = new ArrayList<Tile>();
+		int tank_pos_x = (int) tank.position.x/20;
+		int tank_pos_y = (int) tank.position.y/20;
+		
+		int top_border = 3;
+		if((tank.rotBase > 330 || tank.rotBase < 30) || (tank.rotBase < 210 && tank.rotBase > 150))
+		{
+			//top_border = 3;
+		}
+		else if((tank.rotBase > 300 || tank.rotBase < 60) || (tank.rotBase < 240 && tank.rotBase > 120))
+		{
+			//top_border = 4;
+			tiles.add(mission.map[tank_pos_x +5][tank_pos_y +top_border]);
+			
+			tiles.add(mission.map[tank_pos_x +11][tank_pos_y +top_border]);
+		}
+		else
+		{
+			//top_border = 5;
+			tiles.add(mission.map[tank_pos_x +4][tank_pos_y +top_border]);
+			tiles.add(mission.map[tank_pos_x +5][tank_pos_y +top_border]);
+			
+			tiles.add(mission.map[tank_pos_x +11][tank_pos_y +top_border]);
+			tiles.add(mission.map[tank_pos_x +12][tank_pos_y +top_border]);
+		}		
+
+		tiles.add(mission.map[tank_pos_x +6][tank_pos_y +top_border]);
+		tiles.add(mission.map[tank_pos_x +7][tank_pos_y +top_border]);
+		tiles.add(mission.map[tank_pos_x +8][tank_pos_y +top_border]);
+		tiles.add(mission.map[tank_pos_x +9][tank_pos_y +top_border]);
+		tiles.add(mission.map[tank_pos_x +10][tank_pos_y +top_border]);
+
+		
+		return tiles;
+	}
 	
+	private List<Tile> calcColissionTiles_right(Tank tank)
+	{
+		List<Tile> tiles = new ArrayList<Tile>();
+		int tank_pos_x = (int) tank.position.x/20;
+		int tank_pos_y = (int) tank.position.y/20;
+		
+		int right_border = 13;
+		if((tank.rotBase > 90-30 && tank.rotBase < 90+30) || (tank.rotBase < 270+30 && tank.rotBase > 270-30))
+		{
+			//right_border = 13;
+		}
+		else if((tank.rotBase > 90-60 || tank.rotBase < 90+60) || (tank.rotBase < 270+60 && tank.rotBase > 270-60))
+		{
+			//right_border = 14;
+			tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +5]);
+			
+			tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +11]);
+		}
+		else
+		{
+			//right_border = 15;
+			tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +4]);
+			tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +5]);
+		
+			tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +11]);
+			tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +12]);
+		}		
+
+		tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +6]);
+		tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +7]);
+		tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +8]);
+		tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +9]);
+		tiles.add(mission.map[tank_pos_x +right_border][tank_pos_y +10]);
+
+		
+		return tiles;
+	}
+	
+	private List<Tile> calcColissionTiles_bottom(Tank tank)
+	{
+		List<Tile> tiles = new ArrayList<Tile>();
+		int tank_pos_x = (int) tank.position.x/20;
+		int tank_pos_y = (int) tank.position.y/20;
+		
+		int bottom_border = 13;
+		if((tank.rotBase > 330 || tank.rotBase < 30) || (tank.rotBase < 210 && tank.rotBase > 150))
+		{
+			//bottom_border = 13;
+		}
+		else if((tank.rotBase > 300 || tank.rotBase < 60) || (tank.rotBase < 240 && tank.rotBase > 120))
+		{
+			//bottom_border = 14;
+			tiles.add(mission.map[tank_pos_x +5][tank_pos_y +bottom_border]);
+			
+			tiles.add(mission.map[tank_pos_x +11][tank_pos_y +bottom_border]);
+		}
+		else
+		{
+			//bottom_border = 15;
+			tiles.add(mission.map[tank_pos_x +4][tank_pos_y +bottom_border]);
+			tiles.add(mission.map[tank_pos_x +5][tank_pos_y +bottom_border]);
+			
+			tiles.add(mission.map[tank_pos_x +11][tank_pos_y +bottom_border]);
+			tiles.add(mission.map[tank_pos_x +12][tank_pos_y +bottom_border]);
+		}		
+		
+
+		tiles.add(mission.map[tank_pos_x +6][tank_pos_y +bottom_border]);
+		tiles.add(mission.map[tank_pos_x +7][tank_pos_y +bottom_border]);
+		tiles.add(mission.map[tank_pos_x +8][tank_pos_y +bottom_border]);
+		tiles.add(mission.map[tank_pos_x +9][tank_pos_y +bottom_border]);
+		tiles.add(mission.map[tank_pos_x +10][tank_pos_y +bottom_border]);
+
+		
+		return tiles;
+	}
+	
+	private List<Tile> calcColissionTiles_left(Tank tank)
+	{
+		List<Tile> tiles = new ArrayList<Tile>();
+		int tank_pos_x = (int) tank.position.x/20;
+		int tank_pos_y = (int) tank.position.y/20;
+		
+		int left_border = 3;
+		if((tank.rotBase > 90-30 && tank.rotBase < 90+30) || (tank.rotBase < 270+30 && tank.rotBase > 270-30))
+		{
+			//left_border = 3;
+		}
+		else if((tank.rotBase > 90-60 || tank.rotBase < 90+60) || (tank.rotBase < 270+60 && tank.rotBase > 270-60))
+		{
+			//left_border = 4;
+			tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +5]);
+			
+			tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +11]);
+		}
+		else
+		{
+			//left_border = 5;
+			tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +4]);
+			tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +5]);
+		
+			tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +11]);
+			tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +12]);
+		}		
+		
+
+		tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +6]);
+		tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +7]);
+		tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +8]);
+		tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +9]);
+		tiles.add(mission.map[tank_pos_x +left_border][tank_pos_y +10]);
+
+		
+		return tiles;
+	}
 
 }
