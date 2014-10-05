@@ -1,5 +1,7 @@
 package model;
 
+import javax.annotation.PostConstruct;
+
 import org.lwjgl.util.vector.Vector2f;
 
 
@@ -24,12 +26,10 @@ public class Projectile {
 	public float rotation;
 	
 	
-	public Projectile(int type,int x, int y, float degrees){
+	public Projectile(int type, int x, int y, float degrees){
 		this.type = type;
-	
-		position.x = x;
-		position.y = y;
 		this.rotation = degrees;
+		calculateOrigin(x, y, degrees+270);
 		
 		switch(type){
 		
@@ -53,6 +53,25 @@ public class Projectile {
 	}
 
 
+	private void calculateOrigin(int x, int y, float degrees) {
+		// this is the middle point of the tank (and turret) from where the projectile was shot
+		// since the projectile has to originate from the end of the turret and not the middle
+		// point, we can calculate its actual starting position by knowing the angle (degrees) 
+		// and the size of the tank (radius of drawing circle) which is 150
+		
+		// Note: The hypotenuse is equal to the radius of the drawing circle, which is 150
+		// -> Delta Y is then defined by sin(degrees) = opposite / 150
+		// -> opposite = sin(degrees)*150 (and we need to add 150 because the drawing circle 
+		// originates from the screen's 0/0 and not the middle of the circle)
+		
+		// Delta X is the same as above, but with using cos(degrees) instead
+		
+		position.x = x + (float) Math.cos(Math.toRadians(degrees)) * 150 + 150;
+		position.y = y + (float) Math.sin(Math.toRadians(degrees)) * 150 + 150;
+		System.out.println("new projectile created, originating from: " + position.x + " | " + position.y);		
+	}
+
+
 	// Depending on the degrees at which this projectile was fired, the X and Y speeds can 
 	// be calculated using math... 
 	private void calculateSpeed(float degrees) {
@@ -65,8 +84,8 @@ public class Projectile {
 		// opposite = sin(a) / 1
 		// adjacent = cos(a) / 1 
 		System.out.println("calculating speed of projectile at " + degrees + "°");
-		speed.y = (float) Math.sin(Math.toRadians(degrees))*20;
 		speed.x = (float) Math.cos(Math.toRadians(degrees))*20;
+		speed.y = (float) Math.sin(Math.toRadians(degrees))*20;
 		System.out.println("-> x:" + speed.x + " y:" + speed.y);
 		
 	}

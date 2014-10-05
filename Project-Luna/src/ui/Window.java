@@ -214,8 +214,8 @@ public class Window {
 				
 				// add the projectile to the list of mission projectiles 
 				mission.projectiles.add(new Projectile(	mission.playerTank.stats.getProjectileType(), 
-														(int)mission.playerTank.position.x +150,
-														(int)mission.playerTank.position.y +150,
+														(int)mission.playerTank.position.x,
+														(int)mission.playerTank.position.y,
 														mission.playerTank.rotTurret));
 				
 			}
