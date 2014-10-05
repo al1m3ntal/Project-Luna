@@ -146,10 +146,10 @@ public class Window {
 			
 			// draw the projectile
 			drawImage(	controller.texProjectile[p.type], 
-						(int)(p.position.x - controller.cameraPos.x), 
-						(int)(p.position.y - controller.cameraPos.y), 
-						p.size, // TODO fix size 
-						p.size, // TODO fix size
+						(int)(p.position.x - controller.cameraPos.x - p.sizeX/2), 
+						(int)(p.position.y - controller.cameraPos.y - p.sizeY/2), 
+						p.sizeX, // TODO fix size 
+						p.sizeY, // TODO fix size
 						p.rotation);
 		}
 	}

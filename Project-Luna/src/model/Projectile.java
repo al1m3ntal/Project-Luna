@@ -21,7 +21,8 @@ public class Projectile {
 
 	public Vector2f position = new Vector2f();
 	public Vector2f speed = new Vector2f();
-	public int size = 10;
+	public int sizeX = 10;
+	public int sizeY = 10;
 	public int damage;
 	public float rotation;
 	
@@ -36,10 +37,14 @@ public class Projectile {
 		default:
 		case PROJECTILE_BULLET: 
 			//TODO add more info here 
-			size = 10;
+			sizeX = 10;
+			sizeY = 10;
 			damage = 10;
 			break;
 		case PROJECTILE_SHELL: 
+			sizeX = 10;
+			sizeY = 60;
+			damage = 10;
 			// TODO 
 			break;
 		case PROJECTILE_LASER: 
@@ -68,7 +73,6 @@ public class Projectile {
 		
 		position.x = x + (float) Math.cos(Math.toRadians(degrees)) * 150 + 150;
 		position.y = y + (float) Math.sin(Math.toRadians(degrees)) * 150 + 150;
-		System.out.println("new projectile created, originating from: " + position.x + " | " + position.y);		
 	}
 
 
@@ -83,11 +87,8 @@ public class Projectile {
 		// (Hypotenuse is 1, so we can disregard it completely)
 		// opposite = sin(a) / 1
 		// adjacent = cos(a) / 1 
-		System.out.println("calculating speed of projectile at " + degrees + "°");
 		speed.x = (float) Math.cos(Math.toRadians(degrees))*20;
 		speed.y = (float) Math.sin(Math.toRadians(degrees))*20;
-		System.out.println("-> x:" + speed.x + " y:" + speed.y);
-		
 	}
 	
 	public void update(){
