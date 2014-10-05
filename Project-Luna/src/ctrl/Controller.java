@@ -15,6 +15,8 @@ import model.Tile;
 import org.lwjgl.util.vector.Vector2f;
 import org.newdawn.slick.opengl.Texture;
 
+import util.Animation;
+import util.AnimationManager;
 import util.TextureManager;
 
 /**
@@ -31,9 +33,18 @@ import util.TextureManager;
  *
  */
 public class Controller {
+
+	// class name, do not change (except when changing the actual class name)
+	private final String CLASS = "CONTROLLER";
+
+	public enum GameState{ IN_GAME, IN_MENU }
+
+	/** Current state of the game (see {@link GameState})*/
+	public GameState gameState;
+	
 	
 	// MISSIONS
-	public static final String MISSION_DEBUG = "mission_dev";
+	public static final String MISSION_DEBUG  = "mission_dev";
 	public static final String MISSION_BRIDGE = "bridge";
 
 
@@ -43,29 +54,17 @@ public class Controller {
 	// Projectile textures (The texture is in accordance with the projectile type)
 	public Texture[] texProjectile = new Texture[3];
 	
-	
-	// class name, do not change (except when changing the actual class name)
-	private final String CLASS = "CONTROLLER";
-	
-	public enum GameState{ IN_GAME, IN_MENU }
-	
-	/** Current state of the game (see {@link GameState})*/
-	public GameState gameState;
-		
-	
-	
+	/* ANIMATiONS */
+	public Texture[] animTankFire = new Texture[8];
 	
 	
 	
 
 	/** Current camera position as represented by a {@link Vector2f} */
 	// the camera position should be publicly accessible
-	public Vector2f cameraPos;
+	public Vector2f cameraPos = new Vector2f();
 	
-	public Controller()	{
-		cameraPos = new Vector2f();
-	}
-	
+
 	/**
 	 * Loads a mission from external files and prepares them for the game Window
 	 */
@@ -93,7 +92,17 @@ public class Controller {
 		texProjectile[1] = TextureManager.load("res/projectiles/bullet.png");
 		texProjectile[2] = TextureManager.load("res/projectiles/bullet.png");
 		
+		
+		// Prepare animations for the mission 
+		AnimationManager.prepareAnimation(AnimationManager.ANIM_TANK_FIRE, animTankFire);
+		
+		
+		
 		// TODO load AI tanks 
+	
+		
+		
+		
 		
 
 		
@@ -102,8 +111,9 @@ public class Controller {
 		return mission; 
 	
 	}
+
 	
-	
+
 	private Tile[][] loadMapFile(String missionName){
 		try{
 			File file = new File("missions/" + missionName +".map");
@@ -332,5 +342,6 @@ public class Controller {
 		
 		return tiles;
 	}
+
 
 }

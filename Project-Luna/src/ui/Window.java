@@ -1,26 +1,24 @@
 package ui;
 
 
-import java.awt.Button;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import model.Mission;
 import model.Projectile;
-import model.Tank;
-import model.TankStats;
 
 import org.lwjgl.LWJGLException;
-import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.opengl.Texture;
 
 import ctrl.Controller;
+import util.Animation;
+import util.AnimationManager;
 import util.Log;
+import static org.lwjgl.opengl.GL11.*;
 
 public class Window {
 
@@ -44,6 +42,9 @@ public class Window {
 	
 	/* The current mission that is being played */
 	private Mission mission; 
+	private ArrayList<Animation> animations = new ArrayList<Animation>();
+	
+	
 	
 	
 	public Window(Controller controller){
@@ -67,7 +68,7 @@ public class Window {
 		// game loop 
 		while (!Display.isCloseRequested()){
 			// Clear The Screen And The Depth Buffer
-			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			pollInput(getDelta());
 					
 			//Draw map first, for it should be in the background for obvious reasons
@@ -100,25 +101,25 @@ public class Window {
 			System.exit(0);
 		}
 
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		glEnable(GL_TEXTURE_2D);
 
-		GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 		// enable alpha blending
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		GL11.glViewport(0, 0, width, height);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		glViewport(0, 0, width, height);
+		glMatrixMode(GL_MODELVIEW);
 
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glLoadIdentity();
-		GL11.glOrtho(0, width, height, 0, 1, -1);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, width, height, 0, 1, -1);
+		glMatrixMode(GL_MODELVIEW);
 	}
 	
 	/**
-	 * Draws all the tanks of the controller
+	 * Draws all the tanks of the mission
 	 */
 	private void drawTanks(){
 		/* draw base */
@@ -153,6 +154,35 @@ public class Window {
 						p.rotation);
 		}
 	}
+	
+	public void drawAnimations(){
+	
+		for(Animation anim : animations){
+			
+			if (anim.hasEnded())
+				continue;
+			
+			// get the current time 
+			long currentTime = System.currentTimeMillis();
+			// check if we need to update the animation 
+			if ( currentTime > anim.startTime + anim.stepTime){
+				// we need to draw the next step of this animation, and 
+				// restart the timer 
+				// update the animation
+				anim.startTime = currentTime;
+				anim.update();
+			}
+		
+			drawImage(	controller.animTankFire[anim.currentStep-1],
+						(int) (anim.x - controller.cameraPos.x),
+						(int) (anim.y - controller.cameraPos.y),
+						AnimationManager.spriteWidthTankFire,
+						AnimationManager.spriteHeightTankFire,
+						anim.rotation);
+			
+		}
+		
+	}
 
 	/**
 	 * Draws the map of the controller
@@ -170,7 +200,7 @@ public class Window {
 		// TODO draw tanks now 
 		drawTanks();
 		drawBullets();
-		
+		drawAnimations();
 		
 		// draw mission foreground 
 		if ( mission.mapForeground != null ) // <--- This IF case serves no purpose, since the system will exit when a texture tries to load that does not exist
@@ -182,8 +212,6 @@ public class Window {
 						0f	);
 		
 	}
-	
-
 	
 	/**
 	 * Poll the Input on the Window
@@ -204,9 +232,9 @@ public class Window {
 			// shoot !
 			// get the current time 
 			long currentTime = System.currentTimeMillis();
-			System.out.println("Still waiting " + ( mission.playerTank.lastShotFired - currentTime + 2500) + " for gun cooldown");
+			//System.out.println("Still waiting " + ( mission.playerTank.lastShotFired - currentTime + 2500) + " for gun cooldown");
 			if ( currentTime > mission.playerTank.lastShotFired + mission.playerTank.stats.getReloadTime()){
-				System.out.println("Shoot !");
+				//System.out.println("Shoot !");
 				mission.playerTank.lastShotFired = currentTime;
 				
 				// add the projectile to the list of mission projectiles 
@@ -214,7 +242,14 @@ public class Window {
 														(int)mission.playerTank.position.x,
 														(int)mission.playerTank.position.y,
 														mission.playerTank.rotTurret));
-				
+				// play the "tank fire" animation now
+				Animation tankFire = new Animation();
+				tankFire.x = (int) (mission.playerTank.position.x + (float) Math.cos(Math.toRadians(mission.playerTank.rotTurret+270)) * 225+75);
+				tankFire.y = (int) (mission.playerTank.position.y + (float) Math.sin(Math.toRadians(mission.playerTank.rotTurret+270)) * 225+75);
+				tankFire.rotation = mission.playerTank.rotTurret;
+				tankFire.stepCount = 8;
+				tankFire.stepTime = 50;
+				animations.add(tankFire);
 			}
 			
 			
@@ -251,36 +286,63 @@ public class Window {
 	 */
 	private void drawImage(Texture texture, int x, int y, int w, int h, float rotation) {
 		// store the current model matrix
-		GL11.glPushMatrix();
-		texture.bind(); // or GL11.glBind(texture.getTextureID());
+		glPushMatrix();
+		texture.bind(); // or glBind(texture.getTextureID());
 		
-		GL11.glTranslatef(x+w/2, y+h/2, 0);
-		GL11.glRotatef(rotation, 0f, 0f, 1f);
-		GL11.glTranslatef(-w/2, -h/2, 0);
+		glTranslatef(x+w/2, y+h/2, 0);
+		glRotatef(rotation, 0f, 0f, 1f);
+		glTranslatef(-w/2, -h/2, 0);
 		
-		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glTexCoord2f(0, 0);
-		GL11.glVertex2f(0, 0);
-		GL11.glTexCoord2f(0, texture.getHeight());
-		GL11.glVertex2f(0, h);
-		GL11.glTexCoord2f(texture.getWidth(), texture.getHeight());
-		GL11.glVertex2f(w, h);
-		GL11.glTexCoord2f(texture.getWidth(), 0);
-		GL11.glVertex2f(w, 0);
-		GL11.glEnd();
+		glBegin(GL_QUADS);
+		glTexCoord2f(0, 0);
+		glVertex2f(0, 0);
+		glTexCoord2f(0, texture.getHeight());
+		glVertex2f(0, h);
+		glTexCoord2f(texture.getWidth(), texture.getHeight());
+		glVertex2f(w, h);
+		glTexCoord2f(texture.getWidth(), 0);
+		glVertex2f(w, 0);
+		glEnd();
 		
 		// restore the model view matrix to prevent contamination
-		GL11.glPopMatrix();
+		glPopMatrix();
 	}
 	
+	private void drawImageRect(Texture texture, int x, int y, int w, int h, int rectx, int recty, int rectWidth, int rectHeight, float rotation){
+		// store the current model matrix
+		glPushMatrix();
+		texture.bind(); // or glBind(texture.getTextureID());
+		
+		glTranslatef(x+w/2, y+h/2, 0);
+		glRotatef(rotation, 0f, 0f, 1f);
+		glTranslatef(-w/2, -h/2, 0);
+		
+		glBegin(GL_QUADS);
+		glTexCoord2f(0, 0);
+		glVertex2f(0, 0);
+		glTexCoord2f(0, texture.getHeight());
+		glVertex2f(0, h);
+		glTexCoord2f(texture.getWidth(), texture.getHeight());
+		glVertex2f(w, h);
+		glTexCoord2f(texture.getWidth(), 0);
+		glVertex2f(w, 0);
+		glEnd();
+		
+		// restore the model view matrix to prevent contamination
+		glPopMatrix();
+		
+	}
+	
+	
+	
 	private void drawLine(float x, float y, float x2, float y2) {
-		//GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-	    GL11.glColor3f(0.0f, 1.0f, 0.2f);
-	    GL11.glBegin(GL11.GL_LINE_STRIP);
-	    GL11.glVertex2d(x , y );
-	    GL11.glVertex2d(x2, x2);
-	    GL11.glEnd();
-	    GL11.glColor3f(1.0f, 1.0f, 1.0f);
+		//glClear(GL_COLOR_BUFFER_BIT);
+	    glColor3f(0.0f, 1.0f, 0.2f);
+	    glBegin(GL_LINE_STRIP);
+	    glVertex2d(x , y );
+	    glVertex2d(x2, x2);
+	    glEnd();
+	    glColor3f(1.0f, 1.0f, 1.0f);
 	}
 	
 	
@@ -372,7 +434,5 @@ public class Window {
 	   // return delta;	   
 	    return 1;
 	}
-	
-	
 	
 }

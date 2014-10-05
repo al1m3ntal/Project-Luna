@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.newdawn.slick.opengl.Texture;
 
+import util.Animation;
+
 
 /**
  * @version 1.00

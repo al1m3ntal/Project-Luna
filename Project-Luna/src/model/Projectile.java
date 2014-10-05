@@ -70,9 +70,9 @@ public class Projectile {
 		// originates from the screen's 0/0 and not the middle of the circle)
 		
 		// Delta X is the same as above, but with using cos(degrees) instead
-		
-		position.x = x + (float) Math.cos(Math.toRadians(degrees)) * 150 + 150;
-		position.y = y + (float) Math.sin(Math.toRadians(degrees)) * 150 + 150;
+		// we use 175 here to account for drawing over the turret, which we dont want to do 
+		position.x = x + (float) Math.cos(Math.toRadians(degrees)) * 175 + 150;
+		position.y = y + (float) Math.sin(Math.toRadians(degrees)) * 175 + 150;
 	}
 
 
