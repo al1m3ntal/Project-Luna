@@ -134,9 +134,6 @@ public class Window {
 		// iterate through the list of projectiles
 		for (Projectile	p : mission.projectiles) {
 			
-			// TODO p.update() should come somewhere else ? (e.g. in the game loop, not in the draw method)
-			p.update();
-
 			// if the projectile got destroyed or went out of bounds then we delete it
 			if (p.position.x < 0 || p.position.y < 0 || p.position.x > mission.map.length*20 || p.position.y > mission.map[0].length*20){
 				p = null;

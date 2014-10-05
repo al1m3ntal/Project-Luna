@@ -1,5 +1,7 @@
 package model;
 
+import java.util.List;
+
 import org.lwjgl.util.vector.Vector2f;
 import org.newdawn.slick.opengl.Texture;
 
@@ -49,8 +51,37 @@ public class Tank {
      * Updates the tanks position, speed and rotation
      * gets the deltaT time in seconds
 	 */
-	public void update(double deltaT){
+	public void update(double deltaT, List<Tile> top, List<Tile> right, List<Tile> bottom, List<Tile> left){
+		
+		/* check for collision */
+		if(speed.y < 0)
+			// check if tiles to the right
+			for (Tile tile : top) {
+				if(tile.type == TileType.OBSTACLE)
+					speed.y = 0;
+			}
+		else if(speed.y > 0)
+			// check if tiles to the right
+			for (Tile tile : bottom) {
+				if(tile.type == TileType.OBSTACLE)
+					speed.y = 0;
+			}
+		if(speed.x > 0)
+			// check if tiles to the right
+			for (Tile tile : right) {
+				if(tile.type == TileType.OBSTACLE)
+					speed.x = 0;
+			}
+		else if(speed.x < 0)
+			// check if tiles to the left
+				for (Tile tile : left) {
+					if(tile.type == TileType.OBSTACLE)
+						speed.x = 0;
+				}
+		
 		position.x += speed.x;// * deltaT;
+		
+		
 		position.y += speed.y;// * deltaT;
 		//bleed of the speed over time
 		speed.x *= 0.9f;

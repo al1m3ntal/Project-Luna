@@ -3,8 +3,11 @@ package ctrl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import model.Mission;
+import model.Projectile;
 import model.Tank;
 import model.TankStats;
 import model.Tile;
@@ -131,15 +134,41 @@ public class Controller {
 	
 	private void updateTank(int deltaT) {		
 		/* player tank */
-		mission.playerTank.update(deltaT);
+		List<Tile> toptiles = new ArrayList<Tile>();
+		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
+		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
+		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
+		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
+		toptiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +5]);
+		List<Tile> righttiles = new ArrayList<Tile>();
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +6]);
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +7]);
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +8]);
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +9]);
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +10]);
+		List<Tile> bottomtiles = new ArrayList<Tile>();
+		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +6]);
+		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +7]);
+		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +8]);
+		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +9]);
+		bottomtiles.add(mission.map[(int) mission.playerTank.position.x/20 +14][(int) mission.playerTank.position.y/20 +10]);
+		List<Tile> lefttiles = new ArrayList<Tile>();
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +6]);
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +7]);
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +8]);
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +9]);
+		righttiles.add(mission.map[(int) mission.playerTank.position.x/20 +4][(int) mission.playerTank.position.y/20 +10]);
+		mission.playerTank.update(deltaT, toptiles, righttiles, bottomtiles, lefttiles);
 		/* ai tanks */
 		for (Tank tank : mission.aiTanks) {
-			tank.update(deltaT);
+			tank.update(deltaT, new ArrayList<Tile>(), new ArrayList<Tile>(), new ArrayList<Tile>(), new ArrayList<Tile>());	//TODO
 		}
 	}
 
 	private void updateBullet(int deltaT) {
-		// TODO
+		for (Projectile projectile : mission.projectiles) {
+			projectile.update();
+		}
 	}
 
 	private void updateAI() {
