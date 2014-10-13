@@ -6,6 +6,7 @@ public class AnimationManager {
 
 	// all the sprite definitions come here 
 	public static final int ANIM_TANK_FIRE = 0;
+	public static final int ANIM_EXPLOSION = 1;
 	
 
 	public static int spriteHeightTankFire;
@@ -28,7 +29,21 @@ public class AnimationManager {
 			}
 			
 			break;
+		case ANIM_EXPLOSION: 
+			for(int x = 0 ; x < sprites.length; x ++)
+				sprites[x] = TextureManager.load("res/sprites/explosion/" + x + ".png");
+		
+			// set the width and height of the animation sprites
+			if ( sprites[0] != null ){
+				spriteHeightTankFire = sprites[0].getImageHeight();
+				spriteWidthTankFire = sprites[0].getImageWidth();
+			}
+			
+			break;
 
+			
+			
+			
 		
 		}
 		

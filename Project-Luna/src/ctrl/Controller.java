@@ -56,6 +56,7 @@ public class Controller {
 	
 	/* ANIMATiONS */
 	public Texture[] animTankFire = new Texture[8];
+	public Texture[] animExplosion = new Texture[38];
 	
 	
 	
