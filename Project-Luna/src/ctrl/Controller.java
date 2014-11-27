@@ -145,11 +145,12 @@ public class Controller {
 	
 	private void updateTank(int deltaT) {		
 		/* player tank */
-		mission.playerTank.update(deltaT
-				, calcColissionTiles_top(mission.playerTank)
-				, calcColissionTiles_right(mission.playerTank)
-				, calcColissionTiles_bottom(mission.playerTank)
-				, calcColissionTiles_left(mission.playerTank));
+		//mission.playerTank.update(deltaT
+		//		, calcColissionTiles_top(mission.playerTank)
+		//		, calcColissionTiles_right(mission.playerTank)
+		//		, calcColissionTiles_bottom(mission.playerTank)
+		//		, calcColissionTiles_left(mission.playerTank));
+		mission.playerTank.update(deltaT, mission.map);
 		/* ai tanks */
 		for (Tank tank : mission.aiTanks) {
 			tank.update(deltaT
@@ -199,18 +200,18 @@ public class Controller {
 		int top_border = 3;
 		if((tank.rotBase > 330 || tank.rotBase < 30) || (tank.rotBase < 210 && tank.rotBase > 150))
 		{
-			//top_border = 3;
+			top_border = 3;
 		}
 		else if((tank.rotBase > 300 || tank.rotBase < 60) || (tank.rotBase < 240 && tank.rotBase > 120))
 		{
-			//top_border = 4;
+			top_border = 4;
 			tiles.add(mission.map[tank_pos_x +5][tank_pos_y +top_border]);
 			
 			tiles.add(mission.map[tank_pos_x +11][tank_pos_y +top_border]);
 		}
 		else
 		{
-			//top_border = 5;
+			top_border = 5;
 			tiles.add(mission.map[tank_pos_x +4][tank_pos_y +top_border]);
 			tiles.add(mission.map[tank_pos_x +5][tank_pos_y +top_border]);
 			

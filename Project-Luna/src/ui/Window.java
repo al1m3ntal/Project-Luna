@@ -269,9 +269,16 @@ public class Window {
 		}	
 		/* rotation */
 		if(Keyboard.isKeyDown(Keyboard.KEY_A))
-			mission.playerTank.rotBase -= mission.playerTank.stats.getRotSpeedBase() * deltaT;
+		{
+			if(mission.playerTank.canTurnLeft)
+				mission.playerTank.rotBase -= mission.playerTank.stats.getRotSpeedBase() * deltaT;
+		}			
 		else if(Keyboard.isKeyDown(Keyboard.KEY_D))
-			mission.playerTank.rotBase += mission.playerTank.stats.getRotSpeedBase() * deltaT;
+		{
+			if(mission.playerTank.canTurnRight)
+				mission.playerTank.rotBase += mission.playerTank.stats.getRotSpeedBase() * deltaT;
+		}
+			
 		
 	}
 	
