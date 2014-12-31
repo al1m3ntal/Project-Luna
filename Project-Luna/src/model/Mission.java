@@ -24,6 +24,9 @@ public class Mission {
 	
 	/** Tiled map of this mission. */
 	public Tile[][] map;
+
+	/** Tiles, that are blocked, as calculated during Initializing */
+	public List<Tile> blockedTiles;
 	
 	/** Player's Tank */
 	public Tank playerTank;
@@ -39,6 +42,17 @@ public class Mission {
 	
 	public Mission(String missionName) {
 		aiTanks = new ArrayList<Tank>();
+		blockedTiles = new ArrayList<Tile>();
+	}
+	
+	public void Initialize()
+	{
+		for (int i = 0; i < map.length; i++) {
+			for (int j = 0; j < map[i].length; j++) {
+				if(map[i][j].type == TileType.OBSTACLE)
+					blockedTiles.add(map[i][j]);
+			}
+		}
 	}
 	
 	

@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.Rectangle;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector2f;
@@ -52,213 +53,33 @@ public class Tank {
 		canTurnRight = true;
 		canTurnLeft = true;
 	}
-
-	/**
-	 * Updates the tanks position, speed and rotation gets the deltaT time in
-	 * seconds
-	 * !!!! UNUSED !!!!
-	 */
-	public void update(double deltaT, List<Tile> top, List<Tile> right,
-			List<Tile> bottom, List<Tile> left) {
-
-		/* check for collision */
-		if (speed.y < 0)
-			// check if tiles to the right
-			for (Tile tile : top) {
-				if (tile.type == TileType.OBSTACLE)
-					speed.y = 0;
-				else if (tile.type == TileType.HAZARD)
-					speed.y *= 0.98;
-				else if (tile.type == TileType.WATER)
-					speed.y *= 0.96;
-			}
-		else if (speed.y > 0)
-			// check if tiles to the right
-			for (Tile tile : bottom) {
-				if (tile.type == TileType.OBSTACLE)
-					speed.y = 0;
-				else if (tile.type == TileType.HAZARD)
-					speed.y *= 0.98;
-				else if (tile.type == TileType.WATER)
-					speed.y *= 0.96;
-			}
-		if (speed.x > 0)
-			// check if tiles to the right
-			for (Tile tile : right) {
-				if (tile.type == TileType.OBSTACLE)
-					speed.x = 0;
-				else if (tile.type == TileType.HAZARD)
-					speed.x *= 0.98;
-				else if (tile.type == TileType.WATER)
-					speed.x *= 0.96;
-			}
-		else if (speed.x < 0)
-			// check if tiles to the left
-			for (Tile tile : left) {
-				if (tile.type == TileType.OBSTACLE)
-					speed.x = 0;
-				else if (tile.type == TileType.HAZARD)
-					speed.x *= 0.98;
-				else if (tile.type == TileType.WATER)
-					speed.x *= 0.96;
-			}
-
-		position.x += speed.x;// * deltaT;
-
-		position.y += speed.y;// * deltaT;
-		// bleed of the speed over time
-		speed.x *= 0.9f;
-		speed.y *= 0.9f;
-
-		// rotation should be between 0 - 359 degrees (tbh it probably doesnt
-		// matter)
-		if (rotBase < 0)
-			rotBase += 360;
-		else if (rotBase >= 360)
-			rotBase -= 360;
-	}
-
+	
 	/**
 	 * Updates the tanks position, speed and rotation gets the deltaT time in
 	 * seconds
 	 */
-	public void update(double deltaT, Tile[][] map) {
-
-		//x and y position of tank
-		int x = (int) (position.x / 20);
-		int y = (int) (position.y / 20);
-		
-
-		/* 315 - 045 */
-		/* 135 - 225 */
-		if((rotBase >= 360 - 45 || rotBase <= 0 + 45) || (rotBase >= 180 - 45 && rotBase <= 180 + 45))
+	public void Update(double deltaT, List<Tile> blockedTiles)
+	{
+		if(speed.x != 0)
 		{
-			//y
-			if(speed.y < 0 && (map[x+5][y+2].type == TileType.OBSTACLE || map[x+6][y+2].type == TileType.OBSTACLE
-					|| map[x+7][y+2].type == TileType.OBSTACLE || map[x+8][y+2].type == TileType.OBSTACLE
-					|| map[x+9][y+2].type == TileType.OBSTACLE
-					|| map[x+5][y+3].type == TileType.OBSTACLE || map[x+6][y+3].type == TileType.OBSTACLE
-					|| map[x+7][y+3].type == TileType.OBSTACLE || map[x+8][y+3].type == TileType.OBSTACLE
-					|| map[x+9][y+3].type == TileType.OBSTACLE
-					|| map[x+5][y+4].type == TileType.OBSTACLE || map[x+6][y+4].type == TileType.OBSTACLE
-					|| map[x+7][y+4].type == TileType.OBSTACLE || map[x+8][y+4].type == TileType.OBSTACLE
-					|| map[x+9][y+4].type == TileType.OBSTACLE))			
-				speed.y = 0;	
-			else if(speed.y > 0 && (map[x+5][y+10].type == TileType.OBSTACLE ||map[x+6][y+10].type == TileType.OBSTACLE
-					|| map[x+7][y+10].type == TileType.OBSTACLE || map[x+8][y+10].type == TileType.OBSTACLE
-					|| map[x+9][y+10].type == TileType.OBSTACLE
-					|| map[x+5][y+11].type == TileType.OBSTACLE || map[x+6][y+11].type == TileType.OBSTACLE
-					|| map[x+7][y+11].type == TileType.OBSTACLE || map[x+8][y+11].type == TileType.OBSTACLE
-					|| map[x+9][y+11].type == TileType.OBSTACLE
-					|| map[x+5][y+12].type == TileType.OBSTACLE || map[x+6][y+12].type == TileType.OBSTACLE
-					|| map[x+7][y+12].type == TileType.OBSTACLE || map[x+8][y+12].type == TileType.OBSTACLE
-					|| map[x+9][y+12].type == TileType.OBSTACLE))			
-				speed.y = 0;	
-			//x
-			if(speed.x < 0 && (map[x+4][y+5].type == TileType.OBSTACLE ||map[x+4][y+6].type == TileType.OBSTACLE
-					|| map[x+4][y+7].type == TileType.OBSTACLE || map[x+4][y+8].type == TileType.OBSTACLE
-					|| map[x+4][y+9].type == TileType.OBSTACLE))			
-				speed.y = 0;	
-			else if(speed.y > 0 && (map[x+10][y+5].type == TileType.OBSTACLE ||map[x+10][y+6].type == TileType.OBSTACLE
-					|| map[x+10][y+7].type == TileType.OBSTACLE || map[x+10][y+8].type == TileType.OBSTACLE
-					|| map[x+10][y+9].type == TileType.OBSTACLE))			
-				speed.y = 0;
-			
-			//tank looking up:
-			if(rotBase >= 360 - 45 || rotBase <= 0 + 45)
-			{
-				if(map[x+10][y+3].type == TileType.OBSTACLE || map[x+10][y+4].type == TileType.OBSTACLE || map[x+10][y+5].type == TileType.OBSTACLE)
-					canTurnRight = false;
-				else
-					canTurnRight = true;
-								
-				if(map[x+4][y+3].type == TileType.OBSTACLE || map[x+4][y+4].type == TileType.OBSTACLE || map[x+4][y+5].type == TileType.OBSTACLE)
-					canTurnLeft = false;
-				else
-					canTurnLeft = true;
-			}
-			//tank looking down:
-			else
-			{
-				if(map[x+4][y+9].type == TileType.OBSTACLE || map[x+4][y+10].type == TileType.OBSTACLE || map[x+4][y+11].type == TileType.OBSTACLE)
-					canTurnRight = false;
-				else
-					canTurnRight = true;
-								
-				if(map[x+10][y+9].type == TileType.OBSTACLE || map[x+10][y+10].type == TileType.OBSTACLE || map[x+10][y+11].type == TileType.OBSTACLE)
-					canTurnLeft = false;
-				else
-					canTurnLeft = true;
+			for (Tile tile : blockedTiles) {
+				if(intersects(tile))
+				{
+					speed.x = 0;
+					break;
+				}
 			}
 		}
-		/* 045 - 135 */
-		/* 225 - 315 */
-		if((rotBase >= 90 - 45 && rotBase <= 90 + 45) || (rotBase >= 270 - 45 && rotBase <= 270 + 45))
+		if(speed.y != 0)
 		{
-			//x
-			if(speed.x < 0 && (map[x+2][y+5].type == TileType.OBSTACLE ||map[x+2][y+6].type == TileType.OBSTACLE
-					|| map[x+2][y+7].type == TileType.OBSTACLE || map[x+2][y+8].type == TileType.OBSTACLE
-					|| map[x+2][y+9].type == TileType.OBSTACLE
-					|| map[x+3][y+5].type == TileType.OBSTACLE || map[x+3][y+6].type == TileType.OBSTACLE
-					|| map[x+3][y+7].type == TileType.OBSTACLE || map[x+3][y+8].type == TileType.OBSTACLE
-					|| map[x+3][y+9].type == TileType.OBSTACLE
-					|| map[x+4][y+5].type == TileType.OBSTACLE || map[x+4][y+6].type == TileType.OBSTACLE
-					|| map[x+4][y+7].type == TileType.OBSTACLE || map[x+4][y+8].type == TileType.OBSTACLE
-					|| map[x+4][y+9].type == TileType.OBSTACLE))			
-				speed.x = 0;
-			else if(speed.x > 0 && (map[x+12][y+5].type == TileType.OBSTACLE ||map[x+12][y+6].type == TileType.OBSTACLE
-					|| map[x+12][y+7].type == TileType.OBSTACLE || map[x+12][y+8].type == TileType.OBSTACLE
-					|| map[x+12][y+9].type == TileType.OBSTACLE
-					|| map[x+11][y+5].type == TileType.OBSTACLE || map[x+11][y+6].type == TileType.OBSTACLE
-					|| map[x+11][y+7].type == TileType.OBSTACLE || map[x+11][y+8].type == TileType.OBSTACLE
-					|| map[x+11][y+9].type == TileType.OBSTACLE
-					|| map[x+10][y+5].type == TileType.OBSTACLE || map[x+10][y+6].type == TileType.OBSTACLE
-					|| map[x+10][y+7].type == TileType.OBSTACLE || map[x+10][y+8].type == TileType.OBSTACLE
-					|| map[x+10][y+9].type == TileType.OBSTACLE))			
-				speed.x = 0;
-			//y
-			if(speed.y < 0 && (map[x+5][y+4].type == TileType.OBSTACLE ||map[x+6][y+4].type == TileType.OBSTACLE
-					|| map[x+7][y+4].type == TileType.OBSTACLE || map[x+8][y+4].type == TileType.OBSTACLE
-					|| map[x+9][y+4].type == TileType.OBSTACLE))			
-				speed.y = 0;	
-			else if(speed.y > 0 && (map[x+5][y+10].type == TileType.OBSTACLE ||map[x+6][y+10].type == TileType.OBSTACLE
-					|| map[x+7][y+10].type == TileType.OBSTACLE || map[x+8][y+10].type == TileType.OBSTACLE
-					|| map[x+9][y+10].type == TileType.OBSTACLE))			
-				speed.y = 0;	
-			
-			
-			//tank looking right:
-			if(rotBase >= 90 - 45 && rotBase <= 90 + 45)
-			{
-				if(map[x+9][y+10].type == TileType.OBSTACLE || map[x+10][y+10].type == TileType.OBSTACLE || map[x+11][y+10].type == TileType.OBSTACLE)
-					canTurnRight = false;
-				else
-					canTurnRight = true;
-								
-				if(map[x+9][y+4].type == TileType.OBSTACLE || map[x+10][y+4].type == TileType.OBSTACLE || map[x+11][y+4].type == TileType.OBSTACLE)
-					canTurnLeft = false;
-				else
-					canTurnLeft = true;
+			for (Tile tile : blockedTiles) {
+				if(intersects(tile))
+				{
+					speed.y = 0;
+					break;
+				}
 			}
-			//tank looking left:
-			else
-			{
-				if(map[x+3][y+4].type == TileType.OBSTACLE || map[x+4][y+4].type == TileType.OBSTACLE || map[x+5][y+4].type == TileType.OBSTACLE)
-					canTurnRight = false;
-				else
-					canTurnRight = true;
-								
-				if(map[x+3][y+10].type == TileType.OBSTACLE || map[x+4][y+10].type == TileType.OBSTACLE || map[x+5][y+10].type == TileType.OBSTACLE)
-					canTurnLeft = false;
-				else
-					canTurnLeft = true;
-			}
-			
 		}
-
-		
-		
-		
 		
 		position.x += speed.x;// * deltaT;
 
@@ -274,5 +95,25 @@ public class Tank {
 		else if (rotBase >= 360)
 			rotBase -= 360;
 	}
+	
+	/**
+	 * checks if the (blocked) tile intersects with the frame of the tank.
+	 * Because the tank can rotate, its rotation has to be taken account in
+	 * @param t
+	 * @return
+	 */
+	private boolean intersects(Tile t)
+	{
+		Rectangle rect_tile = new Rectangle((int)(t.position.x * 20), (int)(t.position.y * 20), 20, 20);
+		Rectangle rect_tank = new Rectangle(
+				(int)(position.x + speed.x + 100 - (Math.abs(Math.sin(rotBase*Math.PI/180)) * 50))
+				, (int)(position.y + speed.y + 50 + (Math.abs(Math.sin(rotBase*Math.PI/180)) * 50))
+				, (int) (100 + (Math.abs(Math.sin(rotBase*Math.PI/180))) * 100)
+				, (int) (200 - Math.abs(Math.sin(rotBase*Math.PI/180)) * 100));
 
+		
+		if(rect_tile.intersects(rect_tank))
+			return true;
+		return false;
+	}
 }

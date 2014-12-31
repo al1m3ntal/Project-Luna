@@ -82,6 +82,8 @@ public class Controller {
 		
 		// Load mission map 
 		mission.map = loadMapFile(missionName);
+		mission.Initialize();
+		
 		// load tanks and such 
 		mission.playerTank = new Tank(new TankStats(0));
 		mission.playerTank.texBase = util.TextureManager.load("res/tanks/tank2base.png");
@@ -145,19 +147,10 @@ public class Controller {
 	
 	private void updateTank(int deltaT) {		
 		/* player tank */
-		//mission.playerTank.update(deltaT
-		//		, calcColissionTiles_top(mission.playerTank)
-		//		, calcColissionTiles_right(mission.playerTank)
-		//		, calcColissionTiles_bottom(mission.playerTank)
-		//		, calcColissionTiles_left(mission.playerTank));
-		mission.playerTank.update(deltaT, mission.map);
+		mission.playerTank.Update(deltaT, mission.blockedTiles);
 		/* ai tanks */
 		for (Tank tank : mission.aiTanks) {
-			tank.update(deltaT
-					, calcColissionTiles_top(tank)
-					, calcColissionTiles_right(tank)
-					, calcColissionTiles_bottom(tank)
-					, calcColissionTiles_left(tank));
+			tank.Update(deltaT, mission.blockedTiles);
 		}
 	}
 
